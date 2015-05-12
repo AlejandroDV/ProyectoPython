@@ -5,7 +5,7 @@
 
 __author__ = "alejandro"
 __date__ = "$07-mar-2015 12:37:38$"
-
+#AA
 import numpy
 import cv2
 from Tkinter import *
