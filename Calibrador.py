@@ -35,6 +35,7 @@ medidas = []
 camara = None
 
 
+
 def enlazar_camara(accion):
 
     global id_dispositivo
