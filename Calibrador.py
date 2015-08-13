@@ -47,37 +47,28 @@ def enlazar_camara(accion):
     sup = 0
     inf_patron=0
 
-    frames = 0
-
 
     # Validacion de Datos
     if validador_datos() == 0:
 
         camara = cv2.VideoCapture(int(txt_id_dispositivo.get()))
-
-        while (frames < 10):
-
+        frames = 0
+        while frames < 50:
             # Lectura de la señal de video
             ret, frame = camara.read()
-
             # Imagen Grises
             grises = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
             # Imagen Binaria
             ret, binario = cv2.threshold(grises, 254, 255, cv2.THRESH_BINARY_INV)
-
             # Imagen Suavizada
             suavizado = cv2.medianBlur(binario, 5)
-
             alto, largo = suavizado.shape[:2]
-
             # Buscar la primera fila
-            sup = superior(suavizado)
-
+            # sup = superior(suavizado)
+            sup = detectar_extremos(suavizado, "n")[0]
             flaco = copy.copy(suavizado)
-
+            # Esqueletización
             for c in range(largo):
-
                 inicial = 0
                 # se acota el range entre el sup y el tamaño de la imagen
                 for f in range(sup, alto, 1):
@@ -95,8 +86,7 @@ def enlazar_camara(accion):
                         flaco[i, c] = 255
             if len(flaco) > 0 and sup != 0:
 
-                # region Casos de Accion
-
+                # Casos de Accion
                 if accion == 1:
                     """ Calibración de la cámara"""
 
@@ -127,11 +117,12 @@ def enlazar_camara(accion):
                     # endregion
 
                     # region Calibracion Horizontal
-                    extremos = extremos_patron(flaco)
-                    cv2.rectangle(flaco, (extremos[1], sup), (extremos[2], extremos[0]), (0, 200, 200), 1)
-                    if (extremos[2] - extremos[1]) > 0:
+
+                    extremos = detectar_roi_patron_calibracion(flaco)
+                    cv2.rectangle(flaco, (extremos[2], extremos[0]), (extremos[3], extremos[1]), (0, 200, 200), 1)
+                    if (extremos[3] - extremos[2]) > 0:
                         medida_calibrado_horizontal = float(txt_valor_muestraH.get())
-                        pxXmmH = medida_calibrado_horizontal / (extremos[2] - extremos[1])
+                        pxXmmH = medida_calibrado_horizontal / (extremos[3] - extremos[2])
                         txt_pixelmmH.delete(0, END)
                         txt_pixelmmH.insert(0, pxXmmH)
 
@@ -140,7 +131,7 @@ def enlazar_camara(accion):
                     # endregion
 
                 elif accion == 3:
-                    """ Medición individual Vertical y Horizontal"""
+                    """ Medición prueba Vertical y Horizontal"""
 
                     # Vertical
                     diferencia_v = calibracion - sup
@@ -148,9 +139,9 @@ def enlazar_camara(accion):
 
                     # Horizontal
 
-                    extremos = extremos_patron(flaco)
-                    cv2.rectangle(flaco, (extremos[1], sup), (extremos[2], extremos[0]), (0, 200, 200), 1)
-                    diferencia_h = extremos[2] - extremos[1]
+                    extremos = detectar_roi_patron_calibracion(flaco)
+                    cv2.rectangle(flaco, (extremos[2], extremos[0]), (extremos[3], extremos[1]), (0, 200, 200), 1)
+                    diferencia_h = extremos[3] - extremos[2]
                     medida_h = diferencia_h * pxXmmH
 
                     txt_medidaV.delete(0, END)
@@ -184,58 +175,51 @@ def enlazar_camara(accion):
                 cv2.line(flaco, (0, calibracion), (largo, calibracion), (0, 200, 200), 1)
                 cv2.imshow('Flaco', flaco)
             frames += 1
-            time.sleep(1)
+            #time.sleep(1)
+
+        camara.release()
 
 
-
-def superior(imagen):
-    """
-    Retorna el valor de la primera fila que contiene un pixel 0
-        Parametros:
-            1- Imagen: La imagen a analizar
-    """
-    retorno = 0
+def detectar_extremos(imagen, orientacion):
+    extremos = [0, 0, 0, 0]
     alto, largo = imagen.shape[:2]
-    for f in range(alto):
-        if cv2.countNonZero(imagen[f, :]) != largo:
-            retorno = f
-            break
-    return retorno
+    if "n" in orientacion:
+        for f in range(alto):
+            if cv2.countNonZero(imagen[f, :]) < largo:
+                extremos[0] = f
+                break
+
+    if "s" in orientacion:
+        for f in range(alto - 1, -1, -1):
+            if cv2.countNonZero(imagen[f, :]) < largo:
+                extremos[1] = f - 1
+                break
+
+    if "w" in orientacion:
+        for c in range(largo):
+            if cv2.countNonZero(imagen[:, c]) < alto:
+                extremos[2] = c
+                break
+
+    if "e" in orientacion:
+        for c in range(largo - 1, -1, -1):
+            if cv2.countNonZero(imagen[:, c]) < alto:
+                extremos[3] = c
+                break
+    return extremos
 
 
-def extremos_patron(imagen):
-    """
-    Retorna los valores que delimitan al objeto sobre la plataforma
-        Parametros:
-            1- Imagen: La imagen a analizar
-    """
-
-    # datos[inferior, izquierdo, derecho]
-    datos = [0, 0, 0]
-
-    sup = superior(imagen)
-
+def detectar_roi_patron_calibracion(imagen):
     alto, largo = imagen.shape[:2]
-
-    for f in range(sup, alto, 1):
-        if cv2.countNonZero(imagen[f, :]) == 640:
-            datos[0] = f - 1
+    n = detectar_extremos(imagen, "n")[0]
+    for f in range(n, alto, 1):
+        if cv2.countNonZero(imagen[f, :]) == largo:
+            s = f - 1
             break
-
-    imagen = imagen[sup:datos[0], 0:largo]
-    alto, largo = imagen.shape[:2]
-
-    for c in range(largo):
-        if cv2.countNonZero(imagen[:, c]) < alto:
-            datos[1] = c
-            break
-
-    for c in range(largo - 1, -1, -1):
-        if cv2.countNonZero(imagen[:, c]) < alto:
-            datos[2] = c
-            break
-    return datos
-
+    s_imagen = imagen[n:s, 0:largo]
+    ew = detectar_extremos(s_imagen, "we")
+    roi = [n, s, ew[2], ew[3]]
+    return roi
 
 def validador_datos():
     error = 0
@@ -442,7 +426,7 @@ lbl_id_dispositivo = Label( lblf_enlace_camara, text="ID Dispositivo: ")
 txt_id_dispositivo = Entry( lblf_enlace_camara, width=5)
 lbl_umbral = Label(         lblf_enlace_camara, text="Umbral: ")
 txt_umbral = Entry(         lblf_enlace_camara, width=5)
-btn_acceder = Button(       lblf_enlace_camara, text="Enlazar y Calibrar",command=lambda: enlazar_camara(1))
+btn_acceder = Button(       lblf_enlace_camara, text="Enlazar y Calibrar", command=lambda: enlazar_camara(1))
 lbl_conteo = Label(         lblf_enlace_camara, text="Conteo Px:")
 txt_conteo = Entry(         lblf_enlace_camara, width=5)
 lbl_superior = Label(       lblf_enlace_camara, text="Fila:")
@@ -471,11 +455,11 @@ txt_superior.grid(      row=4, column=1, sticky="w")
 lbl_valor = Label(              lblf_patron, text="Valor")
 lbl_PixelMM = Label(            lblf_patron, text="Px-MM")
 lbl_valor_muestraV = Label(     lblf_patron, text="Z:")
-txt_valor_muestraV = Entry(     lblf_patron, width=5)
+txt_valor_muestraV = Entry(     lblf_patron, width=7)
 lbl_valor_muestraH = Label(     lblf_patron, text="X:")
-txt_valor_muestraH = Entry(     lblf_patron, width=5)
-txt_pixelmmV = Entry(           lblf_patron, width=5)
-txt_pixelmmH = Entry(           lblf_patron, width=5)
+txt_valor_muestraH = Entry(     lblf_patron, width=7)
+txt_pixelmmV = Entry(           lblf_patron, width=7)
+txt_pixelmmH = Entry(           lblf_patron, width=7)
 btn_calibrar_patron = Button(   lblf_patron, text="C", command=lambda: enlazar_camara(2))
 
 txt_valor_muestraV.insert(  0, 10)
