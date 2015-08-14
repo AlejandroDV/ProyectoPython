@@ -262,41 +262,34 @@ def validador_datos():
 
 def calibrar_velocidad():
     global inf_velocidad
-    while True:
+    frames = 0
+    while frames < 10:
         inf_velocidad = detector_lineas_velocidad()[1]
-        if cv2.waitKey(33) & 0xFF == ord('q'):
-            cv.waitKey(1)
-            cv.destroyAllWindows()
-            cv.waitKey(1)
+        frames += 1
+        cv2.waitKey(1)
+    cv2.destroyWindow("Color")
+    cv2.destroyWindow("subcolor")
+    cv2.destroyWindow("Binario")
+
 
 def medir_velocidad():
     global inf_velocidad
 
     supant = detector_lineas_velocidad()[0]
-
     dif_pixeles = float(inf_velocidad - supant)
-    print dif_pixeles
-
     supnue = detector_lineas_velocidad()[0]
-    print supant, supnue
     while supant == supnue:
         supnue = detector_lineas_velocidad()[0]
-        print supnue, inf_velocidad
 
     t_incial = datetime.now()
-    print t_incial
-
-    cv2.destroyWindow("Color")
-    cv2.destroyWindow("subcolor")
-    cv2.destroyWindow("Binario")
-
     while supnue < inf_velocidad:
         supnue = detector_lineas_velocidad()[0]
-        print supnue, inf_velocidad
+        cv2.waitKey(1)
 
     cv2.destroyWindow("Color")
     cv2.destroyWindow("subcolor")
     cv2.destroyWindow("Binario")
+
     t_final = datetime.now()
     t_trancurrido = t_final - t_incial
     print "recorrio: ", dif_pixeles, "pixeles en ", t_trancurrido, "segundos"
@@ -337,7 +330,7 @@ def detector_lineas_velocidad():
     cv2.line(sub_color, (0, supinf[1]), (largo, supinf[1]), (0, 0, 0), 1)
 
     cv2.imshow('Color', color)
-    cv2.imshow("subcolor", sub_color)
+    # cv2.imshow("subcolor", sub_color)
     cv2.imshow('Binario', binario)
 
     return supinf
