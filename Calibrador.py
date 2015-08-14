@@ -119,10 +119,10 @@ def enlazar_camara(accion):
                     # region Calibracion Horizontal
 
                     extremos = detectar_roi_patron_calibracion(flaco)
-                    cv2.rectangle(flaco, (extremos[2], extremos[0]), (extremos[3], extremos[1]), (0, 200, 200), 1)
-                    if (extremos[3] - extremos[2]) > 0:
+                    cv2.rectangle(flaco, (extremos[3], extremos[0]), (extremos[2], extremos[1]), (0, 200, 200), 1)
+                    if (extremos[2] - extremos[3]) > 0:
                         medida_calibrado_horizontal = float(txt_valor_muestraH.get())
-                        pxXmmH = medida_calibrado_horizontal / (extremos[3] - extremos[2])
+                        pxXmmH = medida_calibrado_horizontal / (extremos[2] - extremos[3])
                         txt_pixelmmH.delete(0, END)
                         txt_pixelmmH.insert(0, pxXmmH)
 
@@ -140,8 +140,8 @@ def enlazar_camara(accion):
                     # Horizontal
 
                     extremos = detectar_roi_patron_calibracion(flaco)
-                    cv2.rectangle(flaco, (extremos[2], extremos[0]), (extremos[3], extremos[1]), (0, 200, 200), 1)
-                    diferencia_h = extremos[3] - extremos[2]
+                    cv2.rectangle(flaco, (extremos[3], extremos[0]), (extremos[2], extremos[1]), (0, 200, 200), 1)
+                    diferencia_h = extremos[2] - extremos[3]
                     medida_h = diferencia_h * pxXmmH
 
                     txt_medidaV.delete(0, END)
@@ -182,6 +182,7 @@ def enlazar_camara(accion):
 
 def detectar_extremos(imagen, orientacion):
     extremos = [0, 0, 0, 0]
+    '''[norte, sur, este, oeste]'''
     alto, largo = imagen.shape[:2]
     if "n" in orientacion:
         for f in range(alto):
@@ -195,17 +196,18 @@ def detectar_extremos(imagen, orientacion):
                 extremos[1] = f - 1
                 break
 
-    if "w" in orientacion:
-        for c in range(largo):
+    if "e" in orientacion:
+        for c in range(largo - 1, -1, -1):
             if cv2.countNonZero(imagen[:, c]) < alto:
                 extremos[2] = c
                 break
 
-    if "e" in orientacion:
-        for c in range(largo - 1, -1, -1):
+    if "o" in orientacion:
+        for c in range(largo):
             if cv2.countNonZero(imagen[:, c]) < alto:
                 extremos[3] = c
                 break
+
     return extremos
 
 
@@ -217,8 +219,8 @@ def detectar_roi_patron_calibracion(imagen):
             s = f - 1
             break
     s_imagen = imagen[n:s, 0:largo]
-    ew = detectar_extremos(s_imagen, "we")
-    roi = [n, s, ew[2], ew[3]]
+    eo = detectar_extremos(s_imagen, "eo")
+    roi = [n, s, eo[2], eo[3]]
     return roi
 
 def validador_datos():
