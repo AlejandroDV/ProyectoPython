@@ -409,11 +409,15 @@ def reproducir_video():
         cv.ShowImage("hcq", frameimg)
         cv.WaitKey(1)
 
+def generar_3d():
+    print "generador de 3D"
+
 
 lblf_enlace_camara = LabelFrame(vtnPrincipal, text="1 - Enlace y calibración de Cámara")
 lblf_patron = LabelFrame(vtnPrincipal, text="2 - Calibración con Patrón Eje Z y X")
 lblf_Velocidad = LabelFrame(vtnPrincipal, text="3 - Calibración de Velocidad")
 lblf_captura_frames = LabelFrame(vtnPrincipal, text="4 - Captua de Frames")
+lblf_generacion3D = LabelFrame(vtnPrincipal, text="5 - Medición y Generación 3D")
 
 
 # region 1 - Enlace y calibración de Cámara
@@ -515,20 +519,11 @@ txt_tiempo = Entry(                 lblf_captura_frames, width=5)
 lbl_nombre_video = Label(           lblf_captura_frames, text="Nombre Video:")
 txt_nombre_video = Entry(           lblf_captura_frames)
 btn_capturar = Button(              lblf_captura_frames, text="Capturar Video", command=capturar_video)
-btn_buscar_archivo = Button(        lblf_captura_frames, text='Buscar Video', command=buscar_video)
-lbl_nombre_archivo = Label(         lblf_captura_frames, text="Nombre:")
-txt_nombre_archivo = Entry(         lblf_captura_frames)
-lbl_FPS = Label(                    lblf_captura_frames, text="FPS:")
-txt_FPS = Entry(                    lblf_captura_frames, width=5)
-lbl_frames_archivo = Label(         lblf_captura_frames, text="Frames:")
-txt_frames_archivo = Entry(         lblf_captura_frames, width=5)
-btn_reproducir = Button(            lblf_captura_frames, text='Reproducir Video', command=reproducir_video)
+
 
 txt_tiempo.insert(          0, "")
 txt_nombre_video.insert(    0, "")
-txt_nombre_archivo.insert(  0, "")
-txt_frames_archivo.insert(  0, "")
-txt_FPS.insert(             0, "")
+
 
 lblf_captura_frames.grid(       row=24, column=0, sticky="we")
 lbl_tiempo.grid(                row=24, column=0, sticky="e")
@@ -536,6 +531,25 @@ txt_tiempo.grid(                row=24, column=1, sticky="w")
 lbl_nombre_video.grid(          row=25, column=0, sticky="e")
 txt_nombre_video.grid(          row=25, column=1, sticky="w")
 btn_capturar.grid(              row=26, column=0, columnspan=2)
+
+# endregion
+
+# region 5 - Medición y Generación 3D
+btn_buscar_archivo = Button(        lblf_generacion3D, text='Buscar Video', command=buscar_video)
+lbl_nombre_archivo = Label(         lblf_generacion3D, text="Nombre:")
+txt_nombre_archivo = Entry(         lblf_generacion3D)
+lbl_FPS = Label(                    lblf_generacion3D, text="FPS:")
+txt_FPS = Entry(                    lblf_generacion3D, width=5)
+lbl_frames_archivo = Label(         lblf_generacion3D, text="Frames:")
+txt_frames_archivo = Entry(         lblf_generacion3D, width=5)
+btn_reproducir = Button(            lblf_generacion3D, text='Reproducir Video', command=reproducir_video)
+btn_generar3D = Button(             lblf_generacion3D, text="Generar 3D")
+
+txt_nombre_archivo.insert(  0, "")
+txt_frames_archivo.insert(  0, "")
+txt_FPS.insert(             0, "")
+
+lblf_generacion3D.grid(         row=27, column=0, sticky="we")
 btn_buscar_archivo.grid(        row=27, column=0, columnspan=2)
 lbl_nombre_archivo.grid(        row=28, column=0, sticky="e")
 txt_nombre_archivo.grid(        row=28, column=1, sticky="w")
@@ -544,6 +558,8 @@ txt_FPS.grid(                   row=29, column=1, sticky="w")
 lbl_frames_archivo.grid(        row=30, column=0, sticky="e")
 txt_frames_archivo.grid(        row=30, column=1, sticky="w")
 btn_reproducir.grid(            row=31, column=0, columnspan=2)
+btn_generar3D.grid(             row=32, column=0, columnspan=2)
+
 
 # endregion
 vtnPrincipal.mainloop()
