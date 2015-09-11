@@ -27,129 +27,127 @@ import cv2.cv as cv
 import time
 
 vtnPrincipal = Tk()
-calibracion = 0
-pxXmmV = 0.0
-pxXmmH = 0.0
+calibracion_base = 0
+px_mm_z = 0.0
+px_mm_x = 0.0
 id_dispositivo = 0
 medidas = []
 camara = None
+umbral = 254
 
 
-
-def enlazar_camara(accion):
-
+def calibrar_camara_laser():
+    '''Calibración de cámara y detección de Láser'''
     global id_dispositivo
-    global pxXmmV
-    global pxXmmH
-    global calibracion
+    global calibracion_base
     global medidas
     global camara
-    sup = 0
-    inf_patron=0
-
-
+    global umbral
     # Validacion de Datos
     if validador_datos() == 0:
-
-        camara = cv2.VideoCapture(int(txt_id_dispositivo.get()))
+        id_dispositivo = int(txt_id_dispositivo.get())
+        umbral = int(txt_umbral.get())
+        camara = cv2.VideoCapture(id_dispositivo)
         frames = 0
-        while frames < 50:
+        while frames < 200:
             # Lectura de la señal de video
             ret, frame = camara.read()
-            # Imagen Grises
-            grises = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            # Imagen Binaria
-            ret, binario = cv2.threshold(grises, 254, 255, cv2.THRESH_BINARY_INV)
-            # Imagen Suavizada
-            suavizado = cv2.medianBlur(binario, 5)
-            alto, largo = suavizado.shape[:2]
-            # Buscar la primera fila
-            # sup = superior(suavizado)
-            sup = detectar_extremos(suavizado, "n")[0]
-            flaco = copy.copy(suavizado)
-            # Esqueletización
-            for c in range(largo):
-                inicial = 0
-                # se acota el range entre el sup y el tamaño de la imagen
-                for f in range(sup, alto, 1):
-                    if suavizado[f, c] == 0:
-                        inicial = f
-                    if inicial != 0:
-                        break
-                if inicial == 0:
-                    if calibracion == 0:
-                        flaco[alto - 2, c] = 0
-                    else:
-                        flaco[calibracion, c] = 0
-                else:
-                    for i in range(inicial + 1, alto, 1):
-                        flaco[i, c] = 255
-            if len(flaco) > 0 and sup != 0:
+            flaco = esqueletizador(frame, True)
+            if len(flaco) > 0:
+                cv2.imshow('Esqueleto', flaco)
+            else:
+                tkMessageBox.showerror("Error", "Verifique linea láser")
+            frames += 1
+        camara.release()
 
-                # Casos de Accion
-                if accion == 1:
-                    """ Calibración de la cámara"""
 
-                    cantidad_bits_contados = (alto * largo) - cv2.countNonZero(suavizado)
+def calibrar_patron():
+    '''Calibración Vertical y Horizontal del patron'''
+    global id_dispositivo
+    global px_mm_z
+    global px_mm_x
+    global calibracion_base
+    global medidas
+    global camara
+    # Validacion de Datos
+    camara = cv2.VideoCapture(id_dispositivo)
+    frames = 0
+    while frames < 50:
+        # Lectura de la señal de video
+        ret, frame = camara.read()
+        flaco = esqueletizador(frame, False)
+        if len(flaco) > 0:
+            # region Calibración Z
+            sup = detectar_extremos(flaco, "n")[0]
+            medida_calibrado = float(txt_valor_muestraV.get())
+            if (calibracion_base - sup) > 0:
+                px_mm_z = medida_calibrado / (calibracion_base - sup)
+                txt_pixelmmV.delete(0, END)
+                txt_pixelmmV.insert(0, px_mm_z)
 
-                    calibracion = sup
+            # endregion
 
-                    txt_conteo.delete(0, END)
-                    txt_conteo.insert(0, cantidad_bits_contados)
-                    txt_superior.delete(0, END)
-                    txt_superior.insert(0, sup)
-                    vtnPrincipal.update()
+            # region Calibracion X
+            extremos = detectar_roi_patron_calibracion(flaco)
+            cv2.rectangle(flaco, (extremos[3], extremos[0]), (extremos[2], extremos[1]), (0, 200, 200), 1)
+            if (extremos[2] - extremos[3]) > 0:
+                medida_calibrado_horizontal = float(txt_valor_muestraH.get())
+                px_mm_x = medida_calibrado_horizontal / (extremos[2] - extremos[3])
+                txt_pixelmmH.delete(0, END)
+                txt_pixelmmH.insert(0, px_mm_x)
 
-                    cv2.imshow('Color', frame)
-                    cv2.imshow('Suavizado', suavizado)
+            vtnPrincipal.update()
+            cv2.imshow('Esqueleto', flaco)
+            # endregion
+        else:
+            tkMessageBox.showerror("Error", "Verifique linea láser")
+        frames += 1
+    camara.release()
 
-                elif accion == 2:
-                    """Calibración Vertical y Horizontal del patron"""
 
-                    # region Calibración Vertical
+def control_calibrar_patron():
+    ''' Medición de prueba en Vertical y Horizontal'''
+    global id_dispositivo
+    global px_mm_z
+    global px_mm_x
+    global calibracion_base
+    global medidas
+    global camara
+    camara = cv2.VideoCapture(id_dispositivo)
+    frames = 0
+    while frames < 50:
+        ret, frame = camara.read()
+        flaco = esqueletizador(frame, False)
+        if len(flaco) > 0:
 
-                    medida_calibrado = float(txt_valor_muestraV.get())
-                    if (calibracion - sup) > 0:
-                        pxXmmV = medida_calibrado / (calibracion - sup)
-                        txt_pixelmmV.delete(0, END)
-                        txt_pixelmmV.insert(0, pxXmmV)
 
-                    # endregion
+            # region Medicion en Z
+            sup = detectar_extremos(flaco, "n")[0]
+            diferencia_v = calibracion_base - sup
+            medida_v = diferencia_v * px_mm_z
+            # endregion
 
-                    # region Calibracion Horizontal
+            # region Medicion en X
+            extremos = detectar_roi_patron_calibracion(flaco)
+            cv2.rectangle(flaco, (extremos[3], extremos[0]), (extremos[2], extremos[1]), (0, 200, 200), 1)
+            diferencia_h = extremos[2] - extremos[3]
+            medida_h = diferencia_h * px_mm_x
+            # endregion
 
-                    extremos = detectar_roi_patron_calibracion(flaco)
-                    cv2.rectangle(flaco, (extremos[3], extremos[0]), (extremos[2], extremos[1]), (0, 200, 200), 1)
-                    if (extremos[2] - extremos[3]) > 0:
-                        medida_calibrado_horizontal = float(txt_valor_muestraH.get())
-                        pxXmmH = medida_calibrado_horizontal / (extremos[2] - extremos[3])
-                        txt_pixelmmH.delete(0, END)
-                        txt_pixelmmH.insert(0, pxXmmH)
+            txt_medidaV.delete(0, END)
+            txt_medidaV.insert(0, medida_v)
+            txt_medidaH.delete(0, END)
+            txt_medidaH.insert(0, medida_h)
+            vtnPrincipal.update()
+            cv2.imshow('Esqueleto', flaco)
+        else:
+            tkMessageBox.showerror("Error", "Verifique linea láser")
+        frames += 1
+    camara.release()
 
-                    vtnPrincipal.update()
 
-                    # endregion
-
-                elif accion == 3:
-                    """ Medición prueba Vertical y Horizontal"""
-
-                    # Vertical
-                    diferencia_v = calibracion - sup
-                    medida_v = diferencia_v * pxXmmV
-
-                    # Horizontal
-
-                    extremos = detectar_roi_patron_calibracion(flaco)
-                    cv2.rectangle(flaco, (extremos[3], extremos[0]), (extremos[2], extremos[1]), (0, 200, 200), 1)
-                    diferencia_h = extremos[2] - extremos[3]
-                    medida_h = diferencia_h * pxXmmH
-
-                    txt_medidaV.delete(0, END)
-                    txt_medidaV.insert(0, medida_v)
-                    txt_medidaH.delete(0, END)
-                    txt_medidaH.insert(0, medida_h)
-                    vtnPrincipal.update()
-
+def medicion_perfil():
+    '''
                 elif accion == 4:
 
                     """ Medicion de un perfil completo"""
@@ -159,7 +157,7 @@ def enlazar_camara(accion):
                         for c in range(largo):
                             for f in range((alto - 1), sup, -1):
                                 if flaco[f, c] == 0:
-                                    med = (calibracion - f) * pxXmmV
+                                    med = (calibracion_base - f) * px_mm_z
                                     valor = c, " = ", "%.3f" % med
                                     medidas.append(valor)
                                     break
@@ -172,13 +170,61 @@ def enlazar_camara(accion):
 
                 # endregion
 
-                cv2.line(flaco, (0, calibracion), (largo, calibracion), (0, 200, 200), 1)
-                cv2.imshow('Flaco', flaco)
+                #cv2.line(flaco, (0, calibracion_base), (largo, calibracion_base), (0, 200, 200), 1)
+                #cv2.imshow('Flaco', flaco)
             frames += 1
-            #time.sleep(1)
+            # time.sleep(1)
+            camara.release()
+    '''
 
-        camara.release()
 
+
+def esqueletizador(imagen_color, calibracion):
+    global calibracion_base
+    global umbral
+    flaco = None
+
+    # Imagen Grises
+    grises = cv2.cvtColor(imagen_color, cv2.COLOR_BGR2GRAY)
+    # Imagen Binaria
+    ret, binario = cv2.threshold(grises, umbral, 255, cv2.THRESH_BINARY_INV)
+    # Imagen Suavizada
+    suavizado = cv2.medianBlur(binario, 5)
+    alto, largo = suavizado.shape[:2]
+    # Buscar la primera fila
+    # sup = superior(suavizado)
+    sup = detectar_extremos(suavizado, "n")[0]
+    flaco = copy.copy(suavizado)
+    # Esqueletización
+    for c in range(largo):
+        inicial = 0
+        # se acota el range entre el sup y el tamaño de la imagen
+        for f in range(sup, alto, 1):
+            if suavizado[f, c] == 0:
+                inicial = f
+            if inicial != 0:
+                break
+        if inicial == 0:
+            if calibracion_base == 0:
+                flaco[alto - 2, c] = 0
+            else:
+                flaco[calibracion_base, c] = 0
+        else:
+            for i in range(inicial + 1, alto, 1):
+                flaco[i, c] = 255
+    if calibracion:
+        cv2.line(flaco, (0, sup), (largo, sup), (0, 200, 200), 1)
+        cantidad_bits_contados = (alto * largo) - cv2.countNonZero(suavizado)
+        txt_conteo.delete(0, END)
+        txt_conteo.insert(0, cantidad_bits_contados)
+        vtnPrincipal.update()
+        calibracion_base = sup
+        txt_superior.delete(0, END)
+        txt_superior.insert(0, sup)
+
+    cv2.imshow('Color', imagen_color)
+    cv2.waitKey(1)
+    return flaco
 
 def detectar_extremos(imagen, orientacion):
     extremos = [0, 0, 0, 0]
@@ -222,6 +268,7 @@ def detectar_roi_patron_calibracion(imagen):
     eo = detectar_extremos(s_imagen, "eo")
     roi = [n, s, eo[2], eo[3]]
     return roi
+
 
 def validador_datos():
     error = 0
@@ -409,6 +456,7 @@ def reproducir_video():
         cv.ShowImage("hcq", frameimg)
         cv.WaitKey(1)
 
+
 def generar_3d():
     print "generador de 3D"
 
@@ -425,7 +473,7 @@ lbl_id_dispositivo = Label( lblf_enlace_camara, text="ID Dispositivo: ")
 txt_id_dispositivo = Entry( lblf_enlace_camara, width=5)
 lbl_umbral = Label(         lblf_enlace_camara, text="Umbral: ")
 txt_umbral = Entry(         lblf_enlace_camara, width=5)
-btn_acceder = Button(       lblf_enlace_camara, text="Enlazar y Calibrar", command=lambda: enlazar_camara(1))
+btn_acceder = Button(       lblf_enlace_camara, text="Enlazar y Calibrar", command=calibrar_camara_laser)
 lbl_conteo = Label(         lblf_enlace_camara, text="Conteo Px:")
 txt_conteo = Entry(         lblf_enlace_camara, width=5)
 lbl_superior = Label(       lblf_enlace_camara, text="Fila:")
@@ -459,7 +507,7 @@ lbl_valor_muestraH = Label(     lblf_patron, text="X:")
 txt_valor_muestraH = Entry(     lblf_patron, width=7)
 txt_pixelmmV = Entry(           lblf_patron, width=7)
 txt_pixelmmH = Entry(           lblf_patron, width=7)
-btn_calibrar_patron = Button(   lblf_patron, text="C", command=lambda: enlazar_camara(2))
+btn_calibrar_patron = Button(   lblf_patron, text="C", command=calibrar_patron)
 
 txt_valor_muestraV.insert(  0, 10)
 txt_valor_muestraH.insert(  0, 12)
@@ -480,7 +528,7 @@ btn_calibrar_patron.grid(   row=7, column=2, rowspan=2)
 
 # region 2 - Prueba Medición Total en Z y X
 
-btn_medir = Button(     lblf_patron, text="Control", command=lambda: enlazar_camara(3))
+btn_medir = Button(     lblf_patron, text="Control", command=control_calibrar_patron)
 lbl_medidaV = Label(    lblf_patron, text="Z:")
 txt_medidaV = Entry(    lblf_patron, width=5)
 lbl_mmV = Label(        lblf_patron, text="mm")
