@@ -34,6 +34,7 @@ id_dispositivo = 0
 medidas = []
 camara = None
 umbral = 254
+velocidad = 0.0
 
 
 def calibrar_camara_laser():
@@ -46,10 +47,10 @@ def calibrar_camara_laser():
     # Validacion de Datos
     if validador_datos() == 0:
         id_dispositivo = int(txt_id_dispositivo.get())
-        umbral = int(txt_umbral.get())
         camara = cv2.VideoCapture(id_dispositivo)
+        umbral = int(txt_umbral.get())
         frames = 0
-        while frames < 200:
+        while frames < 50:
             # Lectura de la señal de video
             ret, frame = camara.read()
             flaco = esqueletizador(frame, True)
@@ -178,8 +179,13 @@ def medicion_perfil():
     '''
 
 
-
 def esqueletizador(imagen_color, calibracion):
+    """
+    Realiza el esqueletizado de la imagen con la proyección láser, pasada como parámetro
+    :param imagen_color: La imagen con la proyección láser
+    :param calibracion: si se corresponde a una etapa de calibración o no (True|False)
+    :return: La imagen esqueletizada
+    """
     global calibracion_base
     global umbral
     flaco = None
@@ -226,9 +232,15 @@ def esqueletizador(imagen_color, calibracion):
     cv2.waitKey(1)
     return flaco
 
+
 def detectar_extremos(imagen, orientacion):
+    """
+    Detecta los extremos de la imagen. Usada principalmente sobre una imagen esqueletizada
+    :param imagen: Imagen Original
+    :param orientacion: cadenas con las coordenadas solicitadas "n"(norte)"s"(sur)"e"(este)"o"(oeste)
+    :return: vector con los valores extremos solicitados [Norte, Sur, Este, Oeste]
+    """
     extremos = [0, 0, 0, 0]
-    '''[norte, sur, este, oeste]'''
     alto, largo = imagen.shape[:2]
     if "n" in orientacion:
         for f in range(alto):
@@ -258,6 +270,11 @@ def detectar_extremos(imagen, orientacion):
 
 
 def detectar_roi_patron_calibracion(imagen):
+    """
+    Detecta la ROI para el patrón de calibración
+    :param imagen: La imagen original
+    :return: [Norte, Sur, Este, Oeste]
+    """
     alto, largo = imagen.shape[:2]
     n = detectar_extremos(imagen, "n")[0]
     for f in range(n, alto, 1):
@@ -308,29 +325,62 @@ def validador_datos():
 
 
 def calibrar_velocidad():
+    """
+
+    :return:
+    """
     global inf_velocidad
+    global camara
+    global id_dispositivo
     frames = 0
-    while frames < 10:
-        inf_velocidad = detector_lineas_velocidad()[1]
+    # while frames < 150:
+    id_dispositivo = int(txt_id_dispositivo.get())
+    camara = cv2.VideoCapture(id_dispositivo)
+
+    while True:
+        ret, frame = camara.read()
+        inf_velocidad = detector_lineas_velocidad(frame)[1]
         frames += 1
         cv2.waitKey(1)
+        if cv2.waitKey(33) & 0xFF == ord('q'):
+            break
+
     cv2.destroyWindow("Color")
     cv2.destroyWindow("subcolor")
     cv2.destroyWindow("Binario")
+    camara.release()
 
 
 def medir_velocidad():
+    """
+    Mide el tiempo que transcurre desde que la línea superior está en reposo hasta que pasa por la posición de la
+    linea inferior
+    :return:-
+    """
     global inf_velocidad
+    global velocidad
+    global camara
+    patron = 0.0
+    id_dispositivo = int(txt_id_dispositivo.get())
+    camara = cv2.VideoCapture(id_dispositivo)
+    if len(txt_medida_patron_velocidad.get()) == 0:
+        # por defecto, 10mm
+        patron = 10
+    else:
+        patron = float(txt_medida_patron_velocidad.get())
 
-    supant = detector_lineas_velocidad()[0]
+    ret, frame = camara.read()
+    supant = detector_lineas_velocidad(frame)[0]
     dif_pixeles = float(inf_velocidad - supant)
-    supnue = detector_lineas_velocidad()[0]
+    supnue = detector_lineas_velocidad(frame)[0]
     while supant == supnue:
-        supnue = detector_lineas_velocidad()[0]
+        ret, frame = camara.read()
+        supnue = detector_lineas_velocidad(frame)[0]
 
     t_incial = datetime.now()
     while supnue < inf_velocidad:
-        supnue = detector_lineas_velocidad()[0]
+        ret, frame = camara.read()
+        supnue = detector_lineas_velocidad(frame)[0]
         cv2.waitKey(1)
 
     cv2.destroyWindow("Color")
@@ -338,29 +388,38 @@ def medir_velocidad():
     cv2.destroyWindow("Binario")
 
     t_final = datetime.now()
-    t_trancurrido = t_final - t_incial
-    print "recorrio: ", dif_pixeles, "pixeles en ", t_trancurrido, "segundos"
-    print "hacen: ", t_trancurrido / int(dif_pixeles), "segundos por pixel"
-    px_mm = float(10 / dif_pixeles)
-    print "1 px => ", px_mm, "mm"
-    mm_px = 1 / px_mm
-    print "1 mm => ", mm_px, "px"
+    t_trancurrido = (t_final - t_incial).total_seconds()
+    print t_trancurrido
+    velocidad = patron / t_trancurrido
+    tiempo_espera = t_trancurrido / 10
+
+    txt_velocidad.delete(0, END)
+    txt_velocidad.insert(0, str('{0:.3g}'.format(velocidad)) + " mm/seg")
+    txt_tiempo_espera.delete(0, END)
+    txt_tiempo_espera.insert(0, str(tiempo_espera) + " seg")
+    txt_tiempo.delete(0, END)
+    txt_tiempo.insert(0,tiempo_espera)
+
+    camara.release()
 
 
-def detector_lineas_velocidad():
-    global camara
-    if camara is None:
-        camara = cv2.VideoCapture(int(txt_id_dispositivo.get()))
-
-    ret, color = camara.read()
+def detector_lineas_velocidad(color):
+    """
+    Identifica las filas de 2 líneas usadas como patrón de calibración de velocidad.
+    :return: [Fila Superior, Fila Inferior)
+    """
+    #global camara
+    #global id_dispositivo
+    #if camara is None:
+    #    camara = cv2.VideoCapture(int(txt_id_dispositivo.get()))
+    #ret, color = camara.read()
+    supinf = [0, 0]
+    cv2.imshow('Color', color)
     # sub_color = color[190:290, 270:370]
     sub_color = color[30:290, 270:370]
     grises = cv2.cvtColor(sub_color, cv2.COLOR_BGR2GRAY)
-
     ret, binario = cv2.threshold(grises, 130, 255, cv2.THRESH_BINARY)
-
     cv2.rectangle(color, (270, 30), (370, 290), (0, 0, 0), 1)
-
     alto, largo = binario.shape[:2]
     supinf = [0, 0]
     for f in range(alto):
@@ -372,70 +431,64 @@ def detector_lineas_velocidad():
         if cv2.countNonZero(binario[f, :]) != largo:
             supinf[1] = f
             break
-
     cv2.line(sub_color, (0, supinf[0]), (largo, supinf[0]), (0, 0, 0), 1)
-    cv2.line(sub_color, (0, supinf[1]), (largo, supinf[1]), (0, 0, 0), 1)
-
+    cv2.line(sub_color, (0, supinf[1]), (largo, supinf[1]), (255, 0, 0), 1)
     cv2.imshow('Color', color)
     # cv2.imshow("subcolor", sub_color)
     cv2.imshow('Binario', binario)
-
     return supinf
 
 
 def capturar_video():
+    """
+    Crea un video capturando los frames interesantes, tomando como referencia la velocidad medida en el etapa anterior
+    :return:
+    """
     global camara
+    global id_dispositivo
     if camara is None:
-        camara = cv2.VideoCapture(int(txt_id_dispositivo.get()))
+        camara = cv2.VideoCapture(id_dispositivo)
+    if len(txt_nombre_video.get()) == 0:
+        nombre = "prueba.avi"
+    else:
+        nombre = txt_nombre_video.get() + '.avi'
 
-    nombre = txt_nombre_video.get() + '.avi'
-    txttiempo = txt_tiempo.get()
-
-    if len(txttiempo) == 0:
+    if len(txt_tiempo.get()) == 0:
         tiempo = 1.0
     else:
-        tiempo = float(txttiempo)
-
+        tiempo = float(txt_tiempo.get())
     fourcc = cv2.cv.CV_FOURCC(*'XVID')
     out = cv2.VideoWriter(nombre, fourcc, 20.0, (640, 480))
-
     while True:
         time.sleep(tiempo)
         ret, color = camara.read()
-
         out.write(color)
-
         cv2.imshow('Color', color)
         if cv2.waitKey(33) & 0xFF == ord('q'):
             break
-
+    camara.release()
 
 def buscar_video():
+    """
 
+    :return:
+    """
     global video
-
     file = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar un Archivo')
-
     if file:
-
         cap = cv.CaptureFromFile(file.name)
-
         video = cap
-
         nframes = int(cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FRAME_COUNT))
         fps = int(cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FPS))
         print "total frame", nframes
         print "fps", fps
         print ' currpos of videofile', cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_POS_MSEC)
-
         txt_nombre_archivo.delete(0, END)
         txt_FPS.delete(0, END)
         txt_frames_archivo.delete(0, END)
-
         txt_nombre_archivo.insert(0, file.name)
         txt_FPS.insert(0, fps)
         txt_frames_archivo.insert(0, nframes)
-
         try:
             waitpermillisecond = int(1 * 1000 / fps)
             print "waitpermillisecond", waitpermillisecond
@@ -447,7 +500,7 @@ def buscar_video():
 def reproducir_video():
     """
 
-    :rtype : aaa
+    :return:
     """
     global video
     nframes = int(cv.GetCaptureProperty(video, cv.CV_CAP_PROP_FRAME_COUNT))
@@ -550,24 +603,35 @@ lbl_mmH.grid(           row=12, column=3)
 # endregion
 
 # region 3 - Calibración de Velocidad
-btn_calibrar_velocidad = Button(    lblf_Velocidad, text="Calibrar Velocidad", command=calibrar_velocidad)
+btn_calibrar_velocidad = Button(    lblf_Velocidad, text="Calibrar Patron Velocidad", command=calibrar_velocidad)
+lbl_patron = Label(                 lblf_Velocidad, text="Medida Patron:")
+txt_medida_patron_velocidad=Entry(  lblf_Velocidad, width=5)
 btn_medir_velocidad = Button(       lblf_Velocidad, text="Medir Velocidad", command=medir_velocidad)
+lbl_velocidad = Label(              lblf_Velocidad, text="velocidad:")
+txt_velocidad = Entry(              lblf_Velocidad, width=10)
+lbl_tiempo_espera = Label(          lblf_Velocidad, text="t. espera c/mm:")
+txt_tiempo_espera = Entry(          lblf_Velocidad, width=10)
 
+txt_medida_patron_velocidad.insert(0,10)
 
-lblf_Velocidad.grid(            row=13, column=0, sticky="we")
-btn_calibrar_velocidad.grid(    row=22, column=0, columnspan=2)
-btn_medir_velocidad.grid(       row=23, column=0, columnspan=2)
-
+lblf_Velocidad.grid(                row=13, column=0, sticky="we")
+btn_calibrar_velocidad.grid(        row=22, column=0, columnspan=2)
+lbl_patron.grid(                    row=23, column=0, sticky="e")
+txt_medida_patron_velocidad.grid(   row=23, column=1, sticky="w")
+btn_medir_velocidad.grid(           row=24, column=0, columnspan=2)
+lbl_velocidad.grid(                 row=25, column=0, sticky="e")
+txt_velocidad.grid(                 row=25, column=1)
+lbl_tiempo_espera.grid(             row=26, column=0, sticky="e")
+txt_tiempo_espera.grid(             row=26, column=1)
 
 # endregion
 
 # region 4 - Captua de Frames
 lbl_tiempo = Label(                 lblf_captura_frames, text="Tiempo espera:")
-txt_tiempo = Entry(                 lblf_captura_frames, width=5)
+txt_tiempo = Entry(                 lblf_captura_frames, width=10)
 lbl_nombre_video = Label(           lblf_captura_frames, text="Nombre Video:")
 txt_nombre_video = Entry(           lblf_captura_frames)
 btn_capturar = Button(              lblf_captura_frames, text="Capturar Video", command=capturar_video)
-
 
 txt_tiempo.insert(          0, "")
 txt_nombre_video.insert(    0, "")
