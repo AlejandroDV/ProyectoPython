@@ -53,7 +53,7 @@ def calibrar_camara_laser():
         camara = cv2.VideoCapture(id_dispositivo)
         umbral = int(txt_umbral.get())
         frames = 0
-        while frames < 50:
+        while frames < 100:
             # Lectura de la señal de video
             ret, frame = camara.read()
             flaco = esqueletizador(frame, True)
@@ -189,6 +189,7 @@ def calibrar_extremos():
                 tkMessageBox.showerror("Error", "Verifique linea láser")
             frames += 1
         camara.release()
+
 
 def esqueletizador(imagen_color, calibracion):
     """
@@ -425,7 +426,7 @@ def medir_velocidad():
         txt_tiempo.delete(0, END)
         txt_tiempo.insert(0,tiempo_espera)
 
-        camara.release()
+    camara.release()
 
 
 def detector_lineas_velocidad(color):
@@ -441,10 +442,10 @@ def detector_lineas_velocidad(color):
     supinf = [0, 0]
     cv2.imshow('Color', color)
     # sub_color = color[190:290, 270:370]
-    sub_color = color[30:290, 270:370]
+    sub_color = color[350:450, 270:370]
     grises = cv2.cvtColor(sub_color, cv2.COLOR_BGR2GRAY)
-    ret, binario = cv2.threshold(grises, 130, 255, cv2.THRESH_BINARY)
-    cv2.rectangle(color, (270, 30), (370, 290), (0, 0, 0), 1)
+    ret, binario = cv2.threshold(grises, 160, 255, cv2.THRESH_BINARY)
+    cv2.rectangle(color, (270, 350), (370, 450), (0, 0, 0), 1)
     alto, largo = binario.shape[:2]
     supinf = [0, 0]
     for f in range(alto):
@@ -474,8 +475,7 @@ def capturar_video():
     if not cv2.VideoCapture(int(txt_id_dispositivo.get())).read()[0]:
         tkMessageBox.showerror("Error", "No se detectó la Cámara")
     else:
-        if camara is None:
-            camara = cv2.VideoCapture(id_dispositivo)
+        camara = cv2.VideoCapture(id_dispositivo)
         if len(txt_nombre_video.get()) == 0:
             nombre = "prueba.avi"
         else:
@@ -494,6 +494,7 @@ def capturar_video():
             cv2.imshow('Color', color)
             if cv2.waitKey(33) & 0xFF == ord('q'):
                 break
+
         camara.release()
 
 
