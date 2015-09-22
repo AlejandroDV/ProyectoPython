@@ -19,7 +19,7 @@ Z = np.sin(R)
 X = [0,1,2,3,4]
 Y = [0,1,2,3,4]
 X, Y = np.meshgrid(X, Y)
-Z = [[1,1,1,1,1],[1,2,2,2,1],[1,2,3,2,1],[1,2,2,2,1],[1,1,1,1,1]]
+Z = [[1,1,1,1,1],[1,0.5,0.5,0.5,1],[1,0.5,2,0.5,1],[1,0.5,0.5,0.5,1],[1,1,1,1,1]]
 
 # Tipo de gráfico
 surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm,linewidth=0, antialiased=False)
