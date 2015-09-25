@@ -197,9 +197,9 @@ def generar_3d():
                 flaco = esqueletizador(frame, False)
                 cv2.imshow('Flaco', flaco)
                 vector = medicion_perfil(flaco, columnas)
-
+                #transforma el vector a una matriz
                 matriz_parciales = np.asmatrix(vector)
-
+                # inserta la nueva matriz en una nueva fila de la matriz de mediciones
                 matriz = np.r_[matriz, matriz_parciales]
 
             else:

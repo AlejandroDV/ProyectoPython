@@ -52,13 +52,13 @@
       <file leaf-file-name="escaneador independiente.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/escaneador independiente.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="2.0914454">
-              <caret line="334" column="25" selection-start-line="334" selection-start-column="25" selection-end-line="334" selection-end-column="25" />
+            <state vertical-scroll-proportion="0.9338235">
+              <caret line="201" column="86" selection-start-line="201" selection-start-column="86" selection-end-line="201" selection-end-column="86" />
               <folding>
                 <element signature="e#39#49#0" expanded="true" />
                 <element signature="e#2812#3913#0" expanded="false" />
                 <element signature="e#4837#5205#0" expanded="false" />
-                <element signature="e#6825#8938#0" expanded="false" />
+                <element signature="e#6961#9074#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -620,13 +620,13 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/escaneador independiente.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="2.0914454">
-          <caret line="334" column="25" selection-start-line="334" selection-start-column="25" selection-end-line="334" selection-end-column="25" />
+        <state vertical-scroll-proportion="0.9338235">
+          <caret line="201" column="86" selection-start-line="201" selection-start-column="86" selection-end-line="201" selection-end-column="86" />
           <folding>
             <element signature="e#39#49#0" expanded="true" />
             <element signature="e#2812#3913#0" expanded="false" />
             <element signature="e#4837#5205#0" expanded="false" />
-            <element signature="e#6825#8938#0" expanded="false" />
+            <element signature="e#6961#9074#0" expanded="false" />
           </folding>
         </state>
       </provider>
