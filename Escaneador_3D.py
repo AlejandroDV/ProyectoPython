@@ -25,15 +25,20 @@ import numpy as np
 import tkFileDialog
 import cv2.cv as cv
 import time
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+import matplotlib.pyplot as plt
 
 vtnPrincipal = Tk()
 calibracion_base = 0
 px_mm_z = 0.0
 px_mm_x = 0.0
+px_mm_y = 0.0
 id_dispositivo = 0
 medidas = []
 camara = None
-umbral = 254
+umbral = 250
 velocidad = 0.0
 video = None
 extremo_izquierdo = 0
@@ -500,12 +505,13 @@ def capturar_video():
 
 def buscar_video():
     """
-
     :return:
     """
     global video
     file = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar un Archivo')
     if file:
+        video = cv2.VideoCapture(file.name)
+        """
         cap = cv.CaptureFromFile(file.name)
         video = cap
         nframes = int(cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FRAME_COUNT))
@@ -513,18 +519,15 @@ def buscar_video():
         print "total frame", nframes
         print "fps", fps
         print ' currpos of videofile', cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_POS_MSEC)
-        txt_nombre_archivo.delete(0, END)
-        txt_FPS.delete(0, END)
-        txt_frames_archivo.delete(0, END)
-        txt_nombre_archivo.insert(0, file.name)
-        txt_FPS.insert(0, fps)
-        txt_frames_archivo.insert(0, nframes)
+        txt_video.delete(0, END)
+        txt_video.insert(0, file.name)
         try:
             waitpermillisecond = int(1 * 1000 / fps)
             print "waitpermillisecond", waitpermillisecond
         except:
             pass
         print cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FOURCC)
+        """
 
 
 def reproducir_video():
@@ -546,49 +549,127 @@ def reproducir_video():
 def generar_3d():
     """
     Generación de la matriz de alturas.
-    Se requiere:
-        La calibración de la linea base
-        La calibración del patron en X y Z
-        la calibración de velocidad
     :return: Matriz de alturas
     """
 
+    global video
+    global px_mm_x
+    global px_mm_y
+    global px_mm_z
+    global extremo_izquierdo
+    global extremo_derecho
+    global calibracion_base
 
     if validar_datos_generar_3d():
-        print "generador de 3D"
+        #print video, px_mm_x, px_mm_y, px_mm_z, extremo_izquierdo, extremo_derecho, calibracion_base
+        columnas = ((extremo_derecho - extremo_izquierdo) + 1)
+        matriz = np.zeros((1, columnas))
+
+        while video.isOpened():
+            ret, frame = video.read()
+            if frame != None:
+                flaco = esqueletizador(frame, False)
+                cv2.imshow('Flaco', flaco)
+                vector = medicion_perfil(flaco, columnas)
+                #transforma el vector a una matriz
+                matriz_parciales = np.asmatrix(vector)
+                # inserta la nueva matriz en una nueva fila de la matriz de mediciones
+                matriz = np.r_[matriz, matriz_parciales]
+            else:
+                video.release()
+        dibujar_3d(matriz)
+
+
+def medicion_perfil(imagen, columnas):
+    """
+        se medirá 1 perfil completo
+    :return: vector de medidas
+    """
+    global video
+    global extremo_izquierdo
+    global extremo_derecho
+    global calibracion_base
+    global px_mm_z
+
+    medidas = np.zeros(columnas)
+
+    superior = detectar_extremos(imagen, "n")[0]
+    alto, largo = imagen.shape[:2]
+    for c in range(extremo_izquierdo, extremo_derecho + 1, 1):
+        for f in range((alto - 1), superior, -1):
+            if imagen[f, c] == 0:
+                medidas[c - extremo_izquierdo] = ((calibracion_base - f) * px_mm_z)
+                break
+    return medidas
 
 
 def validar_datos_generar_3d():
 
     global px_mm_x
     global px_mm_z
+    global px_mm_y
     global calibracion_base
     global video
     global velocidad
+    global extremo_derecho
+    global extremo_izquierdo
 
     resultado = True
     mensaje=""
 
-    print px_mm_z
-    print px_mm_x
-    print calibracion_base
-    print video
-    print velocidad
+    if px_mm_y == 0:
+        if len(txt_y.get()) == 0:
+            mensaje = "No se conoce la el patron Y\n"
+            resultado=False
+        else:
+            px_mm_y = float(txt_y.get())
 
-    if velocidad == 0:
-        mensaje = "No se conoce la velocidad de calibración"
-        resultado=False
     if px_mm_x == 0:
-        mensaje = "No se conoce el patron en X"
-        resultado=False
+        if len(txt_x.get()) == 0:
+            mensaje = mensaje + "No se conoce el patron en X\n"
+            resultado=False
+        else:
+            px_mm_x = float(txt_x.get())
+
     if px_mm_z == 0:
-        mensaje = "No se conoce el patron en Z"
-        resultado=False
+        if len(txt_z.get()) == 0:
+            mensaje = mensaje + "No se conoce el patron en Z\n"
+            resultado=False
+        else:
+            px_mm_z = float(txt_z.get())
+
     if calibracion_base == 0:
-        mensaje = "No se conoce la linea base"
-        resultado=False
+        if len(txt_base.get()) ==0:
+            mensaje = mensaje + "No se conoce la linea base\n"
+            resultado=False
+        else:
+            try:
+                calibracion_base = int(txt_base.get())
+            except:
+                tkMessageBox.showerror("Error de tipo", "El valor de Base debe ser un entero")
+
+    if extremo_izquierdo == 0:
+        if len(txt_iz.get()) ==0:
+            mensaje = mensaje + "No se conoce el extremo izquierdo\n"
+            resultado=False
+        else:
+            try:
+                extremo_izquierdo = int(txt_iz.get())
+            except:
+                tkMessageBox.showerror("Error de tipo", "El valor de Extremo Izquierdo debe ser un entero")
+
+    if extremo_derecho == 0:
+        if len(txt_der.get()) ==0:
+            mensaje = mensaje + "No se conoce el extremo derecho\n"
+            resultado=False
+        else:
+            try:
+                extremo_derecho = int(txt_der.get())
+            except:
+                tkMessageBox.showerror("Error de tipo", "El valor de Extremo Izquierdo debe ser un entero")
+
     if video is None:
-        mensaje = "No se cargó el video"
+        mensaje = mensaje + "No se cargó el video\n"
         resultado=False
 
     if not resultado:
@@ -597,39 +678,42 @@ def validar_datos_generar_3d():
     return resultado
 
 
-def medicion_perfil():
-    """
-        se medirá 1 perfil completo
-    :return: vector de medidas
-    """
-    global video
-    """
-                elif accion == 4:
+def dibujar_3d(Z):
+    global px_mm_x
+    global px_mm_y
 
-                    # region Medicion Vertical
-                    if len(medidas) == 0:
-                        for c in range(largo):
-                            for f in range((alto - 1), sup, -1):
-                                if flaco[f, c] == 0:
-                                    med = (calibracion_base - f) * px_mm_z
-                                    valor = c, " = ", "%.3f" % med
-                                    medidas.append(valor)
-                                    break
+    alto, largo = Z.shape[:2]
+    X = np.zeros(largo)
+    Y = np.zeros(alto)
 
-                        for i in medidas:
-                            print i
+    for c in range(len(X)):
+        X[c] = px_mm_x * c
 
-                    vtnPrincipal.update()
-                    # endregion
+    for c in range(len(Y)):
+        Y[c] = px_mm_y * c
 
-                # endregion
+    print "X ", len(X), X
+    print "Y", len(Y), Y
+    print "Z", Z.shape
 
-                #cv2.line(flaco, (0, calibracion_base), (largo, calibracion_base), (0, 200, 200), 1)
-                #cv2.imshow('Flaco', flaco)
-            frames += 1
-            # time.sleep(1)
-            camara.release()
-    """
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    X, Y = np.meshgrid(X, Y)
+
+    # Tipo de gráfico
+    surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+
+    # configuraciones del eje z
+    ax.set_zlim(-1.01, 15)
+    ax.zaxis.set_major_locator(LinearLocator(10))
+    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+
+    fig.colorbar(surf, shrink=0.5, aspect=5)
+
+    plt.show()
+
+
 
 lblf_enlace_camara = LabelFrame(vtnPrincipal, text="1 - Enlace y calibración de Cámara")
 lblf_patron = LabelFrame(vtnPrincipal, text="2 - Calibración con Patrón Eje Z y X")
@@ -780,34 +864,49 @@ btn_capturar.grid(              row=26, column=0, columnspan=2)
 # endregion
 
 # region 5 - Medición y Generación 3D
-lbl_tiempo1 = Label(                lblf_generacion3D, text="Tiempo espera:")
-txt_tiempo1 = Entry(                lblf_generacion3D, width=10)
+lbl_x = Label(      lblf_generacion3D, text="X")
+lbl_z = Label(      lblf_generacion3D, text="Z")
+lbl_y = Label(      lblf_generacion3D, text="Y")
+lbl_iz = Label(     lblf_generacion3D, text="Izquierdo")
+lbl_der = Label(    lblf_generacion3D, text="Derecho")
+lbl_base = Label(   lblf_generacion3D, text="Base")
+lbl_video = Label(  lblf_generacion3D, text="Video")
+
+txt_x = Entry(      lblf_generacion3D, width=10)
+txt_z = Entry(      lblf_generacion3D, width=10)
+txt_y = Entry(      lblf_generacion3D, width=10)
+txt_iz = Entry(     lblf_generacion3D, width=10)
+txt_der = Entry(    lblf_generacion3D, width=10)
+txt_base = Entry(   lblf_generacion3D, width=10)
+txt_video = Entry(  lblf_generacion3D, width=10)
+
 btn_buscar_archivo = Button(        lblf_generacion3D, text='Buscar Video', command=buscar_video)
-lbl_nombre_archivo = Label(         lblf_generacion3D, text="Nombre:")
-txt_nombre_archivo = Entry(         lblf_generacion3D)
-lbl_FPS = Label(                    lblf_generacion3D, text="FPS:")
-txt_FPS = Entry(                    lblf_generacion3D, width=5)
-lbl_frames_archivo = Label(         lblf_generacion3D, text="Frames:")
-txt_frames_archivo = Entry(         lblf_generacion3D, width=5)
-btn_reproducir = Button(            lblf_generacion3D, text='Reproducir Video', command=reproducir_video)
 btn_generar3D = Button(             lblf_generacion3D, text="Generar 3D", command=generar_3d)
 
-txt_nombre_archivo.insert(  0, "")
-txt_frames_archivo.insert(  0, "")
-txt_FPS.insert(             0, "")
+txt_x.insert(0,0.162)
+txt_y.insert(0,1)
+txt_z.insert(0,0.188)
+txt_iz.insert(0,20)
+txt_der.insert(0,636)
+txt_base.insert(0,444)
 
-lblf_generacion3D.grid(         row=27, column=0, sticky="we")
-btn_buscar_archivo.grid(        row=28, column=0, columnspan=2)
-lbl_nombre_archivo.grid(        row=29, column=0, sticky="e")
-txt_nombre_archivo.grid(        row=29, column=1, sticky="w")
-lbl_FPS.grid(                   row=30, column=0, sticky="e")
-txt_FPS.grid(                   row=30, column=1, sticky="w")
-lbl_frames_archivo.grid(        row=31, column=0, sticky="e")
-txt_frames_archivo.grid(        row=31, column=1, sticky="w")
-btn_reproducir.grid(            row=32, column=0, columnspan=2)
-lbl_tiempo1.grid(               row=33, column=0, sticky="e")
-txt_tiempo1.grid(               row=33, column=1, sticky="w")
-btn_generar3D.grid(             row=34, column=0, columnspan=2)
+lblf_generacion3D.grid(         row=30, column=0, sticky="we")
+lbl_x.grid(                     row=30, column=0, sticky="we")
+txt_x.grid(                     row=30, column=1, sticky="we")
+lbl_z.grid(                     row=31, column=0, sticky="we")
+txt_z.grid(                     row=31, column=1, sticky="we")
+lbl_y.grid(                     row=32, column=0, sticky="we")
+txt_y.grid(                     row=32, column=1, sticky="we")
+lbl_iz.grid(                    row=33, column=0, sticky="we")
+txt_iz.grid(                    row=33, column=1, sticky="we")
+lbl_der.grid(                   row=34, column=0, sticky="we")
+txt_der.grid(                   row=34, column=1, sticky="we")
+lbl_base.grid(                  row=35, column=0, sticky="we")
+txt_base.grid(                  row=35, column=1, sticky="we")
+btn_buscar_archivo.grid(        row=36, column=0, columnspan=2)
+lbl_video.grid(                 row=37, column=0, sticky="we")
+txt_video.grid(                 row=37, column=1, sticky="we")
+btn_generar3D.grid(             row=38, column=0, columnspan=2)
 
 
 # endregion
