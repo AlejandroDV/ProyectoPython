@@ -43,6 +43,7 @@ velocidad = 0.0
 video = None
 extremo_izquierdo = 0
 extremo_derecho = 0
+nombre_video = ""
 
 
 def calibrar_camara_laser():
@@ -508,9 +509,13 @@ def buscar_video():
     :return:
     """
     global video
+    global nombre_video
     file = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar un Archivo')
     if file:
         video = cv2.VideoCapture(file.name)
+
+        nombre_video = file.name
+        txt_video.insert(0, file.name)
         """
         cap = cv.CaptureFromFile(file.name)
         video = cap
@@ -594,11 +599,13 @@ def medicion_perfil(imagen, columnas):
     medidas = np.zeros(columnas)
 
     superior = detectar_extremos(imagen, "n")[0]
+    print superior, calibracion_base
     alto, largo = imagen.shape[:2]
     for c in range(extremo_izquierdo, extremo_derecho + 1, 1):
-        for f in range((alto - 1), superior, -1):
+        for f in range(superior, calibracion_base, 1):
             if imagen[f, c] == 0:
-                medidas[c - extremo_izquierdo] = ((calibracion_base - f) * px_mm_z)
+                altura_mm = round(((calibracion_base - f) * px_mm_z), 2)
+                medidas[c - extremo_izquierdo] = altura_mm
                 break
     return medidas
 
@@ -692,9 +699,11 @@ def dibujar_3d(Z):
     for c in range(len(Y)):
         Y[c] = px_mm_y * c
 
-    print "X ", len(X), X
-    print "Y", len(Y), Y
-    print "Z", Z.shape
+    #print "X ", len(X), X
+    #print "Y", len(Y), Y
+    #print "Z", Z.shape
+
+    np.savetxt('test.txt', Z, fmt='%1.2f', delimiter=';')
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
