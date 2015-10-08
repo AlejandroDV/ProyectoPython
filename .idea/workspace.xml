@@ -21,31 +21,17 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Manejador_Saves.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Manejador_Saves.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="33" column="4" selection-start-line="33" selection-start-column="4" selection-end-line="33" selection-end-column="41" />
-              <folding>
-                <element signature="e#42#63#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Descriptor.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Descriptor.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Descriptor.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.49469215">
-              <caret line="134" column="23" selection-start-line="134" selection-start-column="23" selection-end-line="134" selection-end-column="23" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="141" column="4" selection-start-line="141" selection-start-column="4" selection-end-line="141" selection-end-column="4" />
               <folding>
                 <element signature="e#41#51#0" expanded="true" />
-                <element signature="e#520#1000#0" expanded="false" />
                 <element signature="e#1032#1073#0" expanded="false" />
-                <element signature="e#1101#1480#0" expanded="false" />
                 <element signature="e#1511#2607#0" expanded="false" />
-                <element signature="e#4283#4321#0" expanded="false" />
-                <element signature="e#5717#5749#0" expanded="false" />
+                <element signature="e#4318#4356#0" expanded="false" />
+                <element signature="e#5752#5784#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -54,8 +40,8 @@
       <file leaf-file-name="Escaneador_3D.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Escaneador_3D.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="687" column="18" selection-start-line="687" selection-start-column="18" selection-end-line="687" selection-end-column="18" />
+            <state vertical-scroll-proportion="-6.111111">
+              <caret line="549" column="20" selection-start-line="549" selection-start-column="19" selection-end-line="549" selection-end-column="20" />
               <folding>
                 <element signature="e#1045#1055#0" expanded="true" />
                 <element signature="e#1652#2405#0" expanded="false" />
@@ -72,14 +58,22 @@
                 <element signature="e#10968#11886#0" expanded="false" />
                 <element signature="e#11919#12686#0" expanded="false" />
                 <element signature="e#12716#14550#0" expanded="false" />
-                <element signature="e#14595#15815#0" expanded="false" />
                 <element signature="e#15844#16862#0" expanded="false" />
-                <element signature="e#16889#17852#0" expanded="false" />
-                <element signature="e#17883#18252#0" expanded="false" />
                 <element signature="e#18277#19342#0" expanded="false" />
                 <element signature="e#19388#20067#0" expanded="false" />
+                <element signature="e#20107#22220#0" expanded="false" />
                 <element signature="e#22246#23059#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Etiquetador.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Etiquetador.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.5241546">
+              <caret line="97" column="17" selection-start-line="97" selection-start-column="17" selection-end-line="97" selection-end-column="17" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -106,6 +100,7 @@
         <option value="$PROJECT_DIR$/Escaneador_3D.py" />
         <option value="$PROJECT_DIR$/Manejador_Saves.py" />
         <option value="$PROJECT_DIR$/Descriptor.py" />
+        <option value="$PROJECT_DIR$/Etiquetador.py" />
       </list>
     </option>
   </component>
@@ -172,7 +167,7 @@
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="FullScreen" value="false" />
   </component>
-  <component name="RunManager" selected="Python.Descriptor">
+  <component name="RunManager" selected="Python.Etiquetador">
     <configuration default="false" name="Escaneador_3D" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -186,23 +181,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="ProyectoPython" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Escaneador_3D.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="prueba de grafico 3D" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="ProyectoPython" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/prueba de grafico 3D.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -254,6 +232,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="ProyectoPython" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Descriptor.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Etiquetador" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="ProyectoPython" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Etiquetador.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -382,18 +377,18 @@
     </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.Escaneador_3D" />
-      <item index="1" class="java.lang.String" itemvalue="Python.prueba de grafico 3D" />
-      <item index="2" class="java.lang.String" itemvalue="Python.escaneador independiente" />
-      <item index="3" class="java.lang.String" itemvalue="Python.Manejador_Saves" />
-      <item index="4" class="java.lang.String" itemvalue="Python.Descriptor" />
+      <item index="1" class="java.lang.String" itemvalue="Python.escaneador independiente" />
+      <item index="2" class="java.lang.String" itemvalue="Python.Manejador_Saves" />
+      <item index="3" class="java.lang.String" itemvalue="Python.Descriptor" />
+      <item index="4" class="java.lang.String" itemvalue="Python.Etiquetador" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.Descriptor" />
-        <item index="1" class="java.lang.String" itemvalue="Python.Escaneador_3D" />
-        <item index="2" class="java.lang.String" itemvalue="Python.Manejador_Saves" />
-        <item index="3" class="java.lang.String" itemvalue="Python.escaneador independiente" />
-        <item index="4" class="java.lang.String" itemvalue="Python.prueba de grafico 3D" />
+        <item index="0" class="java.lang.String" itemvalue="Python.Etiquetador" />
+        <item index="1" class="java.lang.String" itemvalue="Python.Descriptor" />
+        <item index="2" class="java.lang.String" itemvalue="Python.Escaneador_3D" />
+        <item index="3" class="java.lang.String" itemvalue="Python.Manejador_Saves" />
+        <item index="4" class="java.lang.String" itemvalue="Python.escaneador independiente" />
       </list>
     </recent_temporary>
   </component>
@@ -429,7 +424,7 @@
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286517" sideWeight="0.4977834" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286517" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.30196628" sideWeight="0.4977834" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.38202247" sideWeight="0.4977834" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24952501" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286517" sideWeight="0.49525017" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -456,11 +451,134 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="14" />
+      <option name="time" value="17" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/Descriptor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="121" column="83" selection-start-line="121" selection-start-column="8" selection-end-line="121" selection-end-column="83" />
+          <folding>
+            <element signature="e#41#51#0" expanded="true" />
+            <element signature="e#1032#1073#0" expanded="false" />
+            <element signature="e#1511#2607#0" expanded="false" />
+            <element signature="e#4318#4356#0" expanded="false" />
+            <element signature="e#5752#5784#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Escaneador_3D.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="451" column="8" selection-start-line="451" selection-start-column="8" selection-end-line="451" selection-end-column="8" />
+          <folding>
+            <element signature="e#1045#1055#0" expanded="true" />
+            <element signature="e#1652#2405#0" expanded="false" />
+            <element signature="e#2435#4251#0" expanded="false" />
+            <element signature="e#3062#3084#0" expanded="false" />
+            <element signature="e#3476#3498#0" expanded="false" />
+            <element signature="e#4289#5818#0" expanded="false" />
+            <element signature="e#4849#4871#0" expanded="false" />
+            <element signature="e#5076#5098#0" expanded="false" />
+            <element signature="e#5851#7113#0" expanded="false" />
+            <element signature="e#7167#9271#0" expanded="false" />
+            <element signature="e#9322#10423#0" expanded="false" />
+            <element signature="e#10475#10938#0" expanded="false" />
+            <element signature="e#10968#11886#0" expanded="false" />
+            <element signature="e#11919#12686#0" expanded="false" />
+            <element signature="e#12716#14550#0" expanded="false" />
+            <element signature="e#15844#16862#0" expanded="false" />
+            <element signature="e#18277#19342#0" expanded="false" />
+            <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
+            <element signature="e#22246#23059#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Etiquetador.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Descriptor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="121" column="83" selection-start-line="121" selection-start-column="8" selection-end-line="121" selection-end-column="83" />
+          <folding>
+            <element signature="e#41#51#0" expanded="true" />
+            <element signature="e#1032#1073#0" expanded="false" />
+            <element signature="e#1511#2607#0" expanded="false" />
+            <element signature="e#4318#4356#0" expanded="false" />
+            <element signature="e#5752#5784#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Escaneador_3D.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="213" column="4" selection-start-line="213" selection-start-column="4" selection-end-line="213" selection-end-column="59" />
+          <folding>
+            <element signature="e#1045#1055#0" expanded="true" />
+            <element signature="e#1652#2405#0" expanded="false" />
+            <element signature="e#2435#4251#0" expanded="false" />
+            <element signature="e#3062#3084#0" expanded="false" />
+            <element signature="e#3476#3498#0" expanded="false" />
+            <element signature="e#4289#5818#0" expanded="false" />
+            <element signature="e#4849#4871#0" expanded="false" />
+            <element signature="e#5076#5098#0" expanded="false" />
+            <element signature="e#5851#7113#0" expanded="false" />
+            <element signature="e#7167#9271#0" expanded="false" />
+            <element signature="e#9322#10423#0" expanded="false" />
+            <element signature="e#10475#10938#0" expanded="false" />
+            <element signature="e#10968#11886#0" expanded="false" />
+            <element signature="e#11919#12686#0" expanded="false" />
+            <element signature="e#12716#14550#0" expanded="false" />
+            <element signature="e#15844#16862#0" expanded="false" />
+            <element signature="e#18277#19342#0" expanded="false" />
+            <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
+            <element signature="e#22246#23059#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Etiquetador.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Manejador_Saves.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="33" column="4" selection-start-line="33" selection-start-column="4" selection-end-line="33" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Descriptor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="134" column="23" selection-start-line="134" selection-start-column="23" selection-end-line="134" selection-end-column="23" />
+          <folding>
+            <element signature="e#41#51#0" expanded="true" />
+            <element signature="e#1032#1073#0" expanded="false" />
+            <element signature="e#1511#2607#0" expanded="false" />
+            <element signature="e#4318#4356#0" expanded="false" />
+            <element signature="e#5752#5784#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Escaneador_3D.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -481,29 +599,111 @@
             <element signature="e#10968#11886#0" expanded="false" />
             <element signature="e#11919#12686#0" expanded="false" />
             <element signature="e#12716#14550#0" expanded="false" />
-            <element signature="e#14595#15815#0" expanded="false" />
             <element signature="e#15844#16862#0" expanded="false" />
-            <element signature="e#16889#17852#0" expanded="false" />
-            <element signature="e#17883#18252#0" expanded="false" />
             <element signature="e#18277#19342#0" expanded="false" />
             <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
             <element signature="e#22246#23059#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/escaneador independiente.py">
+    <entry file="file://$PROJECT_DIR$/Manejador_Saves.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="131" column="0" selection-start-line="131" selection-start-column="0" selection-end-line="155" selection-end-column="11" />
+          <caret line="33" column="4" selection-start-line="33" selection-start-column="4" selection-end-line="33" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Descriptor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#39#49#0" expanded="false" />
-            <element signature="e#2812#3913#0" expanded="false" />
-            <element signature="e#3940#4806#0" expanded="false" />
-            <element signature="e#4837#5205#0" expanded="false" />
-            <element signature="e#6338#6921#0" expanded="false" />
-            <element signature="e#6961#9074#0" expanded="false" />
-            <element signature="e#9100#9851#0" expanded="false" />
+            <element signature="e#41#51#0" expanded="true" />
+            <element signature="e#1032#1073#0" expanded="false" />
+            <element signature="e#1511#2607#0" expanded="false" />
+            <element signature="e#4318#4356#0" expanded="false" />
+            <element signature="e#5752#5784#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Escaneador_3D.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="687" column="18" selection-start-line="687" selection-start-column="18" selection-end-line="687" selection-end-column="18" />
+          <folding>
+            <element signature="e#1045#1055#0" expanded="true" />
+            <element signature="e#1652#2405#0" expanded="false" />
+            <element signature="e#2435#4251#0" expanded="false" />
+            <element signature="e#3062#3084#0" expanded="false" />
+            <element signature="e#3476#3498#0" expanded="false" />
+            <element signature="e#4289#5818#0" expanded="false" />
+            <element signature="e#4849#4871#0" expanded="false" />
+            <element signature="e#5076#5098#0" expanded="false" />
+            <element signature="e#5851#7113#0" expanded="false" />
+            <element signature="e#7167#9271#0" expanded="false" />
+            <element signature="e#9322#10423#0" expanded="false" />
+            <element signature="e#10475#10938#0" expanded="false" />
+            <element signature="e#10968#11886#0" expanded="false" />
+            <element signature="e#11919#12686#0" expanded="false" />
+            <element signature="e#12716#14550#0" expanded="false" />
+            <element signature="e#15844#16862#0" expanded="false" />
+            <element signature="e#18277#19342#0" expanded="false" />
+            <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
+            <element signature="e#22246#23059#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Manejador_Saves.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="33" column="4" selection-start-line="33" selection-start-column="4" selection-end-line="33" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Descriptor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#41#51#0" expanded="true" />
+            <element signature="e#1032#1073#0" expanded="false" />
+            <element signature="e#1511#2607#0" expanded="false" />
+            <element signature="e#4318#4356#0" expanded="false" />
+            <element signature="e#5752#5784#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Escaneador_3D.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="687" column="18" selection-start-line="687" selection-start-column="18" selection-end-line="687" selection-end-column="18" />
+          <folding>
+            <element signature="e#1045#1055#0" expanded="true" />
+            <element signature="e#1652#2405#0" expanded="false" />
+            <element signature="e#2435#4251#0" expanded="false" />
+            <element signature="e#3062#3084#0" expanded="false" />
+            <element signature="e#3476#3498#0" expanded="false" />
+            <element signature="e#4289#5818#0" expanded="false" />
+            <element signature="e#4849#4871#0" expanded="false" />
+            <element signature="e#5076#5098#0" expanded="false" />
+            <element signature="e#5851#7113#0" expanded="false" />
+            <element signature="e#7167#9271#0" expanded="false" />
+            <element signature="e#9322#10423#0" expanded="false" />
+            <element signature="e#10475#10938#0" expanded="false" />
+            <element signature="e#10968#11886#0" expanded="false" />
+            <element signature="e#11919#12686#0" expanded="false" />
+            <element signature="e#12716#14550#0" expanded="false" />
+            <element signature="e#15844#16862#0" expanded="false" />
+            <element signature="e#18277#19342#0" expanded="false" />
+            <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
+            <element signature="e#22246#23059#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -528,12 +728,10 @@
             <element signature="e#10968#11886#0" expanded="false" />
             <element signature="e#11919#12686#0" expanded="false" />
             <element signature="e#12716#14550#0" expanded="false" />
-            <element signature="e#14595#15815#0" expanded="false" />
             <element signature="e#15844#16862#0" expanded="false" />
-            <element signature="e#16889#17852#0" expanded="false" />
-            <element signature="e#17883#18252#0" expanded="false" />
             <element signature="e#18277#19342#0" expanded="false" />
             <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
             <element signature="e#22246#23059#0" expanded="false" />
           </folding>
         </state>
@@ -543,15 +741,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="131" column="0" selection-start-line="131" selection-start-column="0" selection-end-line="155" selection-end-column="11" />
-          <folding>
-            <element signature="e#39#49#0" expanded="false" />
-            <element signature="e#2812#3913#0" expanded="false" />
-            <element signature="e#3940#4806#0" expanded="false" />
-            <element signature="e#4837#5205#0" expanded="false" />
-            <element signature="e#6338#6921#0" expanded="false" />
-            <element signature="e#6961#9074#0" expanded="false" />
-            <element signature="e#9100#9851#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -575,12 +764,10 @@
             <element signature="e#10968#11886#0" expanded="false" />
             <element signature="e#11919#12686#0" expanded="false" />
             <element signature="e#12716#14550#0" expanded="false" />
-            <element signature="e#14595#15815#0" expanded="false" />
             <element signature="e#15844#16862#0" expanded="false" />
-            <element signature="e#16889#17852#0" expanded="false" />
-            <element signature="e#17883#18252#0" expanded="false" />
             <element signature="e#18277#19342#0" expanded="false" />
             <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
             <element signature="e#22246#23059#0" expanded="false" />
           </folding>
         </state>
@@ -590,15 +777,42 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="131" column="0" selection-start-line="131" selection-start-column="0" selection-end-line="155" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Escaneador_3D.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#39#49#0" expanded="false" />
-            <element signature="e#2812#3913#0" expanded="false" />
-            <element signature="e#3940#4806#0" expanded="false" />
-            <element signature="e#4837#5205#0" expanded="false" />
-            <element signature="e#6338#6921#0" expanded="false" />
-            <element signature="e#6961#9074#0" expanded="false" />
-            <element signature="e#9100#9851#0" expanded="false" />
+            <element signature="e#1045#1055#0" expanded="true" />
+            <element signature="e#1652#2405#0" expanded="false" />
+            <element signature="e#2435#4251#0" expanded="false" />
+            <element signature="e#3062#3084#0" expanded="false" />
+            <element signature="e#3476#3498#0" expanded="false" />
+            <element signature="e#4289#5818#0" expanded="false" />
+            <element signature="e#4849#4871#0" expanded="false" />
+            <element signature="e#5076#5098#0" expanded="false" />
+            <element signature="e#5851#7113#0" expanded="false" />
+            <element signature="e#7167#9271#0" expanded="false" />
+            <element signature="e#9322#10423#0" expanded="false" />
+            <element signature="e#10475#10938#0" expanded="false" />
+            <element signature="e#10968#11886#0" expanded="false" />
+            <element signature="e#11919#12686#0" expanded="false" />
+            <element signature="e#12716#14550#0" expanded="false" />
+            <element signature="e#15844#16862#0" expanded="false" />
+            <element signature="e#18277#19342#0" expanded="false" />
+            <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
+            <element signature="e#22246#23059#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/escaneador independiente.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="131" column="0" selection-start-line="131" selection-start-column="0" selection-end-line="155" selection-end-column="11" />
         </state>
       </provider>
     </entry>
@@ -622,12 +836,10 @@
             <element signature="e#10968#11886#0" expanded="false" />
             <element signature="e#11919#12686#0" expanded="false" />
             <element signature="e#12716#14550#0" expanded="false" />
-            <element signature="e#14595#15815#0" expanded="false" />
             <element signature="e#15844#16862#0" expanded="false" />
-            <element signature="e#16889#17852#0" expanded="false" />
-            <element signature="e#17883#18252#0" expanded="false" />
             <element signature="e#18277#19342#0" expanded="false" />
             <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
             <element signature="e#22246#23059#0" expanded="false" />
           </folding>
         </state>
@@ -637,15 +849,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#39#49#0" expanded="false" />
-            <element signature="e#2812#3913#0" expanded="false" />
-            <element signature="e#3940#4806#0" expanded="false" />
-            <element signature="e#4837#5205#0" expanded="false" />
-            <element signature="e#6338#6921#0" expanded="false" />
-            <element signature="e#6961#9074#0" expanded="false" />
-            <element signature="e#9100#9851#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -669,12 +872,10 @@
             <element signature="e#10968#11886#0" expanded="false" />
             <element signature="e#11919#12686#0" expanded="false" />
             <element signature="e#12716#14550#0" expanded="false" />
-            <element signature="e#14595#15815#0" expanded="false" />
             <element signature="e#15844#16862#0" expanded="false" />
-            <element signature="e#16889#17852#0" expanded="false" />
-            <element signature="e#17883#18252#0" expanded="false" />
             <element signature="e#18277#19342#0" expanded="false" />
             <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
             <element signature="e#22246#23059#0" expanded="false" />
           </folding>
         </state>
@@ -707,12 +908,10 @@
             <element signature="e#10968#11886#0" expanded="false" />
             <element signature="e#11919#12686#0" expanded="false" />
             <element signature="e#12716#14550#0" expanded="false" />
-            <element signature="e#14595#15815#0" expanded="false" />
             <element signature="e#15844#16862#0" expanded="false" />
-            <element signature="e#16889#17852#0" expanded="false" />
-            <element signature="e#17883#18252#0" expanded="false" />
             <element signature="e#18277#19342#0" expanded="false" />
             <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
             <element signature="e#22246#23059#0" expanded="false" />
           </folding>
         </state>
@@ -745,12 +944,10 @@
             <element signature="e#10968#11886#0" expanded="false" />
             <element signature="e#11919#12686#0" expanded="false" />
             <element signature="e#12716#14550#0" expanded="false" />
-            <element signature="e#14595#15815#0" expanded="false" />
             <element signature="e#15844#16862#0" expanded="false" />
-            <element signature="e#16889#17852#0" expanded="false" />
-            <element signature="e#17883#18252#0" expanded="false" />
             <element signature="e#18277#19342#0" expanded="false" />
             <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
             <element signature="e#22246#23059#0" expanded="false" />
           </folding>
         </state>
@@ -783,12 +980,10 @@
             <element signature="e#10968#11886#0" expanded="false" />
             <element signature="e#11919#12686#0" expanded="false" />
             <element signature="e#12716#14550#0" expanded="false" />
-            <element signature="e#14595#15815#0" expanded="false" />
             <element signature="e#15844#16862#0" expanded="false" />
-            <element signature="e#16889#17852#0" expanded="false" />
-            <element signature="e#17883#18252#0" expanded="false" />
             <element signature="e#18277#19342#0" expanded="false" />
             <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
             <element signature="e#22246#23059#0" expanded="false" />
           </folding>
         </state>
@@ -821,12 +1016,10 @@
             <element signature="e#10968#11886#0" expanded="false" />
             <element signature="e#11919#12686#0" expanded="false" />
             <element signature="e#12716#14550#0" expanded="false" />
-            <element signature="e#14595#15815#0" expanded="false" />
             <element signature="e#15844#16862#0" expanded="false" />
-            <element signature="e#16889#17852#0" expanded="false" />
-            <element signature="e#17883#18252#0" expanded="false" />
             <element signature="e#18277#19342#0" expanded="false" />
             <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
             <element signature="e#22246#23059#0" expanded="false" />
           </folding>
         </state>
@@ -852,12 +1045,10 @@
             <element signature="e#10968#11886#0" expanded="false" />
             <element signature="e#11919#12686#0" expanded="false" />
             <element signature="e#12716#14550#0" expanded="false" />
-            <element signature="e#14595#15815#0" expanded="false" />
             <element signature="e#15844#16862#0" expanded="false" />
-            <element signature="e#16889#17852#0" expanded="false" />
-            <element signature="e#17883#18252#0" expanded="false" />
             <element signature="e#18277#19342#0" expanded="false" />
             <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
             <element signature="e#22246#23059#0" expanded="false" />
           </folding>
         </state>
@@ -881,32 +1072,20 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="131" column="0" selection-start-line="131" selection-start-column="0" selection-end-line="155" selection-end-column="11" />
-          <folding>
-            <element signature="e#39#49#0" expanded="false" />
-            <element signature="e#2812#3913#0" expanded="false" />
-            <element signature="e#3940#4806#0" expanded="false" />
-            <element signature="e#4837#5205#0" expanded="false" />
-            <element signature="e#6338#6921#0" expanded="false" />
-            <element signature="e#6961#9074#0" expanded="false" />
-            <element signature="e#9100#9851#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Manejador_Saves.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
+        <state vertical-scroll-proportion="0.7434402">
           <caret line="33" column="4" selection-start-line="33" selection-start-column="4" selection-end-line="33" selection-end-column="41" />
-          <folding>
-            <element signature="e#42#63#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Escaneador_3D.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="687" column="18" selection-start-line="687" selection-start-column="18" selection-end-line="687" selection-end-column="18" />
+        <state vertical-scroll-proportion="-6.111111">
+          <caret line="549" column="20" selection-start-line="549" selection-start-column="19" selection-end-line="549" selection-end-column="20" />
           <folding>
             <element signature="e#1045#1055#0" expanded="true" />
             <element signature="e#1652#2405#0" expanded="false" />
@@ -923,12 +1102,10 @@
             <element signature="e#10968#11886#0" expanded="false" />
             <element signature="e#11919#12686#0" expanded="false" />
             <element signature="e#12716#14550#0" expanded="false" />
-            <element signature="e#14595#15815#0" expanded="false" />
             <element signature="e#15844#16862#0" expanded="false" />
-            <element signature="e#16889#17852#0" expanded="false" />
-            <element signature="e#17883#18252#0" expanded="false" />
             <element signature="e#18277#19342#0" expanded="false" />
             <element signature="e#19388#20067#0" expanded="false" />
+            <element signature="e#20107#22220#0" expanded="false" />
             <element signature="e#22246#23059#0" expanded="false" />
           </folding>
         </state>
@@ -936,17 +1113,23 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Descriptor.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.49469215">
-          <caret line="134" column="23" selection-start-line="134" selection-start-column="23" selection-end-line="134" selection-end-column="23" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="141" column="4" selection-start-line="141" selection-start-column="4" selection-end-line="141" selection-end-column="4" />
           <folding>
             <element signature="e#41#51#0" expanded="true" />
-            <element signature="e#520#1000#0" expanded="false" />
             <element signature="e#1032#1073#0" expanded="false" />
-            <element signature="e#1101#1480#0" expanded="false" />
             <element signature="e#1511#2607#0" expanded="false" />
-            <element signature="e#4283#4321#0" expanded="false" />
-            <element signature="e#5717#5749#0" expanded="false" />
+            <element signature="e#4318#4356#0" expanded="false" />
+            <element signature="e#5752#5784#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Etiquetador.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5241546">
+          <caret line="97" column="17" selection-start-line="97" selection-start-column="17" selection-end-line="97" selection-end-column="17" />
+          <folding />
         </state>
       </provider>
     </entry>

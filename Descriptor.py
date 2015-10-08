@@ -139,6 +139,7 @@ def binarizar():
             if medidas_suavizadas[f, c] == altura_real:
                 img[f, c] = 255
     cv2.imshow('result', img)
+    cv2.imwrite('binario.png',img)
 
 
 contenedor_pestanas = Notebook(vtnPrincipal)
