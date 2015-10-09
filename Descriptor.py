@@ -13,6 +13,7 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import matplotlib.pyplot as plt
 from ttk import *
 from numpy import genfromtxt
+import os
 
 vtnPrincipal = Tk()
 px_mm_x = 0.0
@@ -21,41 +22,67 @@ medidas = []
 medidas_suavizadas = []
 altura_real = 0.0
 error_admitido = 0.0
+nombre_archivo = ""
+imagen_binarizada = None
+
+regiones = []
+etiquetas = []
+etiqueta_actual = 0
+padres_hijos=[]
 
 
 def buscar_datos_config():
     global px_mm_x
     global px_mm_y
     global medidas
-    archivo = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar un Archivo')
-    if archivo:
-        with open(archivo.name, "r") as ins:
-            array = []
-            for line in ins:
-                array.append(float(line))
-        px_mm_x = array[0]
-        px_mm_y = array[1]
-        txt_x.insert(0, px_mm_x)
-        txt_y.insert(0, px_mm_y)
-        if len(medidas) > 0:
-            activar_pestania2()
+    try:
+        archivo = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar el archivo con los Datos de Configuracion')
+        if archivo:
+            with open(archivo.name, "r") as ins:
+                array = []
+                for line in ins:
+                    array.append(float(line))
+            px_mm_x = array[0]
+            px_mm_y = array[1]
+            txt_x.insert(0, px_mm_x)
+            txt_y.insert(0, px_mm_y)
+            activar_pestania_suavizado()
+    except ValueError:
+        tkMessageBox.showerror("Error", "Verifique el archivo seleccionado")
+    except:
+        tkMessageBox.showerror("Error", "Error Inesperado")
 
 
-def activar_pestania2():
-    contenedor_pestanas.tab(1,state="normal")
+def activar_pestania_suavizado():
+    global medidas
+    global px_mm_y
+    global px_mm_x
+    if len(medidas) > 0 and (px_mm_y != 0) and (px_mm_y != 0):
+        contenedor_pestanas.tab(1, state="normal")
 
 
 def buscar_matriz():
     global medidas
     global px_mm_y
     global px_mm_x
-    archivo = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar un Archivo')
-    if archivo:
-        medidas = genfromtxt(archivo.name, delimiter=';')
-        txt_matriz_cargada.delete(0,END)
-        txt_matriz_cargada.insert(0,"OK")
-        if (px_mm_y != 0) and (px_mm_y != 0):
-            activar_pestania2()
+    global nombre_archivo
+    try:
+        archivo = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar el archivo con la Matriz de Medidas')
+        if archivo:
+            medidas = genfromtxt(archivo.name, delimiter=';')
+            activar_pestania_suavizado()
+            nombre = os.path.split(archivo.name)[1]
+            for i in nombre:
+                if i != ".":
+                    nombre_archivo += i
+                else:
+                    break
+            txt_matriz_cargada.delete(0,END)
+            txt_matriz_cargada.insert(0,nombre_archivo)
+    except ValueError:
+        tkMessageBox.showerror("Error", "Verifique el archivo seleccionado")
+    except:
+        tkMessageBox.showerror("Error", "Error Inesperado")
 
 
 def dibujar_3d(opcion):
@@ -110,6 +137,7 @@ def suavizar():
     global error_admitido
     global medidas
     global medidas_suavizadas
+    global nombre_archivo
     alto, largo = medidas.shape[:2]
     try:
         altura_real = float(txt_altura_real.get())
@@ -119,7 +147,9 @@ def suavizar():
             for c in range(largo):
                 if ( abs( altura_real - medidas_suavizadas[f, c] ) <= error_admitido ):
                     medidas_suavizadas[f, c] = altura_real
-        np.savetxt('suavizado.txt', medidas_suavizadas, fmt='%1.2f', delimiter=';')
+        nombre_archivo_txt = nombre_archivo+'_suavizado.txt'
+        np.savetxt(nombre_archivo_txt, medidas_suavizadas, fmt='%1.2f', delimiter=';')
+        tkMessageBox.showinfo("Atención", "Las medidas suavizadas se almacenaron en: "+nombre_archivo_txt)
     except ValueError:
         tkMessageBox.showerror("Error", "Verifique los datos cargados")
 
@@ -127,28 +157,179 @@ def suavizar():
 def binarizar():
     global medidas_suavizadas
     global altura_real
+    global nombre_archivo
+    global imagen_binarizada
     if len(medidas_suavizadas)==0:
         archivo = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar un Archivo')
         if archivo:
             medidas_suavizadas = genfromtxt(archivo.name, delimiter=';')
     alto, largo = medidas_suavizadas.shape[:2]
     size = (alto,largo, 1)
-    img = np.zeros(size)
+    imagen_binarizada = np.zeros(size)
     for f in range(alto):
         for c in range(largo):
             if medidas_suavizadas[f, c] == altura_real:
-                img[f, c] = 255
-    cv2.imshow('result', img)
-    cv2.imwrite('binario.png',img)
+                imagen_binarizada[f, c] = 255
+    nombre_archivo_imagen = nombre_archivo + '_binario.png'
+    cv2.imshow(nombre_archivo+' Binarizado', imagen_binarizada)
+    cv2.imwrite(nombre_archivo_imagen, imagen_binarizada)
+    tkMessageBox.showinfo("Atención", "La imagen Binarizada se guardaron en: " + nombre_archivo_imagen)
+    txt_imagen_binarizada.insert(0, nombre_archivo_imagen)
+
+
+def buscar_imagen_binarizada():
+    global imagen_binarizada
+    if imagen_binarizada is None:
+        file = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar la Imagen Binarizada a Etiquetar')
+        if file:
+            color = cv2.imread(file.name)
+            grises = cv2.cvtColor(color, cv2.COLOR_BGR2GRAY)
+            ret, imagen_binarizada = cv2.threshold(grises, 100, 255, cv2.THRESH_BINARY)
+            cv2.imshow("Imagen Binarizada", imagen_binarizada)
+            nombre_imagen_binarizada = os.path.split(file.name)[1]
+            txt_imagen_binarizada.insert(0, nombre_imagen_binarizada)
+
+
+def identificar_regiones():
+    global imagen_binarizada
+    global regiones
+    global nombre_archivo
+    if imagen_binarizada is None:
+        tkMessageBox.showerror("Error", "No se cargo la imagen fuente")
+    else:
+        alto, largo = imagen_binarizada.shape[:2]
+        size = (alto,largo, 1)
+        regiones = np.zeros(size)
+
+        print(imagen_binarizada)
+        for f in range(alto):
+            for c in range(largo):
+                if(imagen_binarizada[f,c] == 0):
+                    regiones[f,c] = 1
+        nombre_etiquetas_archivo = nombre_archivo + '_regiones.txt'
+        np.savetxt(nombre_etiquetas_archivo, regiones, fmt='%1.0f', delimiter=';')
+        tkMessageBox.showinfo("Atención", "Se guardo el registro de regiones detectadas en:" + nombre_etiquetas_archivo)
+
+
+def etiquetar():
+    global regiones
+    global etiquetas
+    global etiqueta_actual
+    global padres_hijos
+    global nombre_archivo
+    global imagen_binarizada
+    cambio = False
+    if len(regiones) == 0:
+        file = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar El archivo con las Regiones Detectadas')
+        if file:
+            regiones = genfromtxt(file.name, delimiter=';')
+
+    alto, largo = regiones.shape[:2]
+    size = (alto, largo, 1)
+    etiquetas = np.zeros(size)
+    padres_hijos = np.zeros((1, 2))
+
+    for f in range(alto):
+        for c in range(largo):
+            if regiones[f, c] == 1:
+                if c == 0 and f == 0:
+                    sm = etiquetas[f, c]
+                elif c == 0 and f > 0:
+                    sm = etiquetas[f - 1:f + 1, c:c + 1]
+                elif c > 0 and f == 0:
+                    sm = etiquetas[f:f + 1, c - 1:c + 1]
+                else:
+                    sm = etiquetas[f - 1:f + 1, c - 1:c + 1]
+                etiquetas[f, c] = etiquetado_vecindad(sm)
+
+    nombre_padre_hijo = nombre_archivo + '_padre-hijo.txt'
+    nombre_etiquetas_archivo = nombre_archivo + '_etiquetas.txt'
+
+    np.savetxt(nombre_padre_hijo, padres_hijos, fmt='%1.0f', delimiter=';')
+    np.savetxt(nombre_etiquetas_archivo, etiquetas, fmt='%1.0f', delimiter=';')
+
+
+    filas, columnas = padres_hijos.shape[:2]
+
+    for f in range(alto):
+        for c in range(largo):
+            if etiquetas[f,c] != 0:
+                for ff in range(filas):
+                    if etiquetas[f,c] == padres_hijos[ff,1]:
+                        etiquetas[f,c] = padres_hijos[ff,0]
+
+
+    nombre_etiquetas_normalizadas = nombre_archivo + '_etiquetas_normalizado.txt'
+    np.savetxt(nombre_etiquetas_normalizadas, etiquetas, fmt='%1.0f', delimiter=';')
+
+    tkMessageBox.showinfo("Atención", "Se guardaron 3 archivos:\n"
+                                        "1- Prioridad de Etiquetas: "+ nombre_padre_hijo + "\n"
+                                        "2- Etiquetas: "+nombre_etiquetas_archivo+"\n"
+                                        "3- Etiquetas Normalizadas: "+nombre_etiquetas_normalizadas
+                          )
+
+
+
+def etiquetado_vecindad(matriz):
+    global etiqueta_actual
+    global padres_hijos
+    etiqueta = 0
+    try:
+        alto, largo = matriz.shape[:2]
+    except ValueError:
+        alto = 1
+        largo = 1
+    if (alto * largo) == 4:
+        a = np.array([matriz[0, 1], matriz[1, 0]])
+        minimo = np.amin(a)
+        maximo = np.amax(a)
+    else:
+        minimo = np.amin(matriz)
+        maximo = np.amax(matriz)
+
+    if minimo == 0 and maximo == 0:
+        etiqueta_actual += 1
+        etiqueta = etiqueta_actual
+    elif minimo == 0 and maximo != 0:
+        etiqueta = maximo
+    elif minimo != 0 and maximo != 0:
+        etiqueta = minimo
+        filas, columnas = padres_hijos.shape[:2]
+
+        if minimo!=maximo:
+            existe=False
+            for f in range(filas):
+                if padres_hijos[f, 0] == minimo and padres_hijos[f, 1] == maximo:
+                    existe=True
+
+            if not existe:
+                existe = False
+                for ff in range(filas):
+                    if padres_hijos[ff,1] == minimo:
+                        minimo = padres_hijos[ff,0]
+                for f in range(filas):
+                    if padres_hijos[f, 0] == minimo and padres_hijos[f, 1] == maximo:
+                        existe=True
+                if not existe:
+                    nuevohijo = np.asmatrix(np.array([minimo, maximo]))
+                    padres_hijos = np.r_[padres_hijos, nuevohijo]
+
+
+
+    #print matriz, "min: ",minimo,"max: ", maximo, "etiq: ",etiqueta
+    #print "*********************************************************"
+    return etiqueta
 
 
 contenedor_pestanas = Notebook(vtnPrincipal)
 pestana_cargar_datos = Frame(contenedor_pestanas)
 pestana_suavizado = Frame(contenedor_pestanas)
-pestana_binarizar = Frame(contenedor_pestanas)
+pestana_etiquetar = Frame(contenedor_pestanas)
+pestana_descriptor = Frame(contenedor_pestanas)
 contenedor_pestanas.add(pestana_cargar_datos, text="Cargar Datos")
-contenedor_pestanas.add(pestana_suavizado, text="Suavizado")
-contenedor_pestanas.add(pestana_binarizar, text="Binarizar")
+contenedor_pestanas.add(pestana_suavizado, text="Suavizado y Binarizado")
+contenedor_pestanas.add(pestana_etiquetar, text="Etiquetado")
+contenedor_pestanas.add(pestana_descriptor, text="Descripción")
 contenedor_pestanas.pack()
 
 # region Pestaña de selección de datos
@@ -159,7 +340,7 @@ lbl_y =                         Label(pestana_cargar_datos, text="Y:")
 txt_y =                         Entry(pestana_cargar_datos, width=7)
 btn_seleccionar_matriz =        Button(pestana_cargar_datos, text="Seleccionar Matriz", command=buscar_matriz)
 lbl_matriz_cargada =            Label(pestana_cargar_datos, text="Matriz cargada:")
-txt_matriz_cargada =            Entry(pestana_cargar_datos, width=7)
+txt_matriz_cargada =            Entry(pestana_cargar_datos, width=14)
 btn_dibujar_3d =                Button(pestana_cargar_datos, text="Dibujar 3D", command=lambda: dibujar_3d(1))
 
 txt_matriz_cargada.insert(0,"No")
@@ -178,13 +359,17 @@ contenedor_pestanas.tab(1,state="disabled")
 
 # endregion
 
-# region Suavizado de superficie
+# region Suavizado y Binarizado
 lbl_altura_real = Label(pestana_suavizado, text="Valor Real:")
 txt_altura_real = Entry(pestana_suavizado, width=7)
 lbl_error = Label(pestana_suavizado, text="Error admitido:")
 txt_error = Entry(pestana_suavizado, width=7)
 btn_suavizar = Button(pestana_suavizado, text="Suavizar:", command=suavizar)
 btn_dibujar_3d_suavizado = Button(pestana_suavizado, text="Dibujar 3D:", command=lambda: dibujar_3d(2))
+btn_binarizar = Button(pestana_suavizado, text="Binarizar", command=binarizar)
+
+txt_altura_real.insert(0, 15)
+txt_error.insert(0, 1)
 
 lbl_altura_real.grid(           row=0, column=0)
 txt_altura_real.grid(           row=0, column=1)
@@ -192,13 +377,25 @@ lbl_error.grid(                 row=1, column=0)
 txt_error.grid(                 row=1, column=1)
 btn_suavizar.grid(              row=2, column=0, columnspan=2)
 btn_dibujar_3d_suavizado.grid(  row=3, column=0, columnspan=2)
+btn_binarizar.grid(             row=4, column=0, columnspan=2)
 
 # endregion
 
-# region Binarizacion
+# region Suavizado y Binarizado
 
-btn_binarizar = Button(pestana_binarizar, text="Binarizar", command=binarizar)
-btn_binarizar.grid(row=0, column=0)
+# region Etiquetado
+
+btn_buscar_imagen_binarizada = Button(pestana_etiquetar, text="Buscar Imagen Bin", command=buscar_imagen_binarizada)
+txt_imagen_binarizada = Entry(pestana_etiquetar)
+btn_identificar_regiones = Button(pestana_etiquetar, text="Identificar Regiones", command=identificar_regiones)
+btn_etiquetar = Button(pestana_etiquetar, text="Etiquetar", command=etiquetar)
+
+btn_buscar_imagen_binarizada.grid(  row=0, column=0)
+txt_imagen_binarizada.grid(         row=0, column=1)
+btn_identificar_regiones.grid(      row=1, column=0)
+btn_etiquetar.grid(                 row=2, column=0)
+
+# endregion
 
 #endregion
 vtnPrincipal.mainloop()

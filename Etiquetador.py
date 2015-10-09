@@ -16,7 +16,7 @@ etiquetas = []
 etiqueta_actual = 0
 padres_hijos=[]
 
-def buscar():
+def buscar_matriz_suavizados():
     global imagen
     file = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar un Archivo')
     if file:
@@ -87,6 +87,7 @@ def etiquetar():
 
         np.savetxt('etiquetas_normalizado.txt', etiquetas, fmt='%1.0f', delimiter=';')
 
+
 def etiquetado_vecindad(matriz):
     global etiqueta_actual
     global padres_hijos
@@ -137,7 +138,7 @@ def etiquetado_vecindad(matriz):
     #print "*********************************************************"
     return etiqueta
 
-btn_buscar = Button(vtnPrincipal, text="Buscar", command=buscar)
+btn_buscar = Button(vtnPrincipal, text="Buscar", command=buscar_matriz_suavizados)
 btn_identificar_regiones =Button(vtnPrincipal, text="Identificar Regiones", command=identificar_regiones)
 btn_etiquetar = Button(vtnPrincipal,text="Etiquetar", command=etiquetar)
 
