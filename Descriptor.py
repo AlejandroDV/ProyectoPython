@@ -24,6 +24,7 @@ altura_real = 0.0
 error_admitido = 0.0
 nombre_archivo = ""
 imagen_binarizada = None
+imagen_descriptiva = None
 
 regiones = []
 etiquetas = []
@@ -321,6 +322,63 @@ def etiquetado_vecindad(matriz):
     return etiqueta
 
 
+def buscar_etiquetas():
+    global etiquetas
+    global nombre_archivo
+    img_preliminar = []
+
+    if len(etiquetas) == 0:
+        archivo = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar El archivo con las Regiones Detectadas')
+        if file:
+            etiquetas = genfromtxt(archivo.name, delimiter=';')
+            if len(nombre_archivo) == 0:
+                nombre = os.path.split(archivo.name)[1]
+                print nombre
+                for i in nombre:
+                    if i != ".":
+                        nombre_archivo += i
+                    else:
+                        break
+            txt_etiquetas.delete(0, END)
+            txt_etiquetas.insert(0, nombre_archivo)
+    for item in np.unique(etiquetas):
+        lst_etiquetas.insert(END, item)
+
+
+def describir_etiqueta():
+    global etiquetas
+    global imagen_descriptiva
+    alto, largo = etiquetas.shape[:2]
+    if len(etiquetas) != 0:
+        etiqueta_seleccionada = int(lst_etiquetas.get(lst_etiquetas.curselection()))
+        "Se describitá el número identificador de la etiqueta seleccionada"
+        txt_descriptor_id.delete(0, END)
+        txt_descriptor_id.insert(0, etiqueta_seleccionada)
+        "Se mostrará la imagen representatica"
+        imagen_descriptiva = np.ones((alto, largo)) * 255
+        for f in range(alto):
+            for c in range(largo):
+                if etiquetas[f, c] == etiqueta_seleccionada:
+                    imagen_descriptiva[f, c] = 0
+        cv2.imshow('Region', imagen_descriptiva)
+        np.savetxt("etiqueta_filtrada.txt", imagen_descriptiva, fmt='%1.0f', delimiter=';')
+        "Se contarán los píxeles que forman la imagen"
+        contador_etiqueta = 0
+        contador_fondo = 0
+        for f in range(alto):
+            for c in range(largo):
+                if imagen_descriptiva[f, c] == 0:
+                    contador_etiqueta += 1
+                else:
+                    contador_fondo += 1
+        print contador_etiqueta, contador_fondo, contador_etiqueta+contador_fondo
+        txt_descriptor_contador.delete(0, END)
+        txt_descriptor_contador.insert(0, contador_etiqueta)
+    else:
+        tkMessageBox.showinfo("Atención", "No existe una matriz de Etiquetas cargada:")
+
+
+
 contenedor_pestanas = Notebook(vtnPrincipal)
 pestana_cargar_datos = Frame(contenedor_pestanas)
 pestana_suavizado = Frame(contenedor_pestanas)
@@ -381,8 +439,6 @@ btn_binarizar.grid(             row=4, column=0, columnspan=2)
 
 # endregion
 
-# region Suavizado y Binarizado
-
 # region Etiquetado
 
 btn_buscar_imagen_binarizada = Button(pestana_etiquetar, text="Buscar Imagen Bin", command=buscar_imagen_binarizada)
@@ -397,5 +453,26 @@ btn_etiquetar.grid(                 row=2, column=0)
 
 # endregion
 
-#endregion
+# region Descripción
+btn_buscar_etiquetas = Button(pestana_descriptor, text="Buscar Matriz Etiquetas", command=buscar_etiquetas)
+txt_etiquetas = Entry(pestana_descriptor)
+btn_describir_etiqueta = Button(pestana_descriptor, text="Describir", command=describir_etiqueta)
+lst_etiquetas = Listbox(pestana_descriptor)
+lst_etiquetas.pack()
+lbl_descriptor_id = Label(pestana_descriptor, text="Nº Etiqueta: ")
+txt_descriptor_id = Entry(pestana_descriptor)
+lbl_descriptor_contador = Label(pestana_descriptor, text="Contador:")
+txt_descriptor_contador = Entry(pestana_descriptor)
+
+
+btn_buscar_etiquetas.grid(      row=0, column=0)
+txt_etiquetas.grid(             row=0, column=1, columnspan=2)
+lst_etiquetas.grid(             row=1, column=0, rowspan=10)
+btn_describir_etiqueta.grid(    row=1, column=1)
+lbl_descriptor_id.grid(         row=2, column=1, sticky="e")
+txt_descriptor_id.grid(         row=2, column=2)
+lbl_descriptor_contador.grid(   row=3, column=1, sticky="e")
+txt_descriptor_contador.grid(   row=3, column=2)
+# endregion
+
 vtnPrincipal.mainloop()
