@@ -1,4 +1,6 @@
 # coding=utf-8
+from ttk import Notebook
+
 __author__ = 'Alejandro'
 
 """
@@ -38,7 +40,7 @@ px_mm_y = 0.0
 id_dispositivo = 0
 medidas = []
 camara = None
-umbral = 250
+umbral = 245
 velocidad = 0.0
 video = None
 extremo_izquierdo = 0
@@ -59,7 +61,7 @@ def calibrar_camara_laser():
         camara = cv2.VideoCapture(id_dispositivo)
         umbral = int(txt_umbral.get())
         frames = 0
-        while frames < 100:
+        while frames < 200:
             # Lectura de la señal de video
             ret, frame = camara.read()
             flaco = esqueletizador(frame, True)
@@ -178,9 +180,9 @@ def calibrar_extremos():
             if len(flaco) > 0:
                 alto, largo = flaco.shape[:2]
                 extremos = detectar_extremos(flaco, "eo")
-                print extremos
-                extremo_izquierdo = extremos[2]
-                extremo_derecho = extremos[3]
+                #print extremos
+                extremo_izquierdo = extremos[3]
+                extremo_derecho = extremos[2]
 
                 cv2.line(flaco, (extremo_izquierdo, 0), (extremo_izquierdo, alto), (0, 0, 0), 1)
                 cv2.line(flaco, (extremo_derecho, 0), (extremo_derecho, alto), (0, 0, 0), 1)
@@ -365,15 +367,15 @@ def calibrar_velocidad():
         tkMessageBox.showerror("Error", "No se detectó la Cámara")
     else:
         camara = cv2.VideoCapture(id_dispositivo)
-
-        while True:
+        frames = 0
+        while frames < 200:
             ret, frame = camara.read()
             inf_velocidad = detector_lineas_velocidad(frame)[1]
             frames += 1
             cv2.waitKey(1)
-            if cv2.waitKey(33) & 0xFF == ord('q'):
-                break
-
+            #if cv2.waitKey(33) & 0xFF == ord('q'):
+             #   break
+            frames += 1
         cv2.destroyWindow("Color")
         cv2.destroyWindow("subcolor")
         cv2.destroyWindow("Binario")
@@ -421,7 +423,7 @@ def medir_velocidad():
 
         t_final = datetime.now()
         t_trancurrido = (t_final - t_incial).total_seconds()
-        print t_trancurrido
+        #print t_trancurrido
         velocidad = patron / t_trancurrido
         tiempo_espera = t_trancurrido / 10
 
@@ -599,7 +601,7 @@ def medicion_perfil(imagen, columnas):
     medidas = np.zeros(columnas)
 
     superior = detectar_extremos(imagen, "n")[0]
-    print superior, calibracion_base
+    #print superior, calibracion_base
     alto, largo = imagen.shape[:2]
     for c in range(extremo_izquierdo, extremo_derecho + 1, 1):
         for f in range(superior, calibracion_base, 1):
@@ -688,6 +690,7 @@ def validar_datos_generar_3d():
 def dibujar_3d(Z):
     global px_mm_x
     global px_mm_y
+    global nombre_video
 
     alto, largo = Z.shape[:2]
     X = np.zeros(largo)
@@ -703,7 +706,9 @@ def dibujar_3d(Z):
     #print "Y", len(Y), Y
     #print "Z", Z.shape
 
-    np.savetxt('test.txt', Z, fmt='%1.2f', delimiter=';')
+
+    archivo_medidas = nombre_video+"-medidas.txt"
+    np.savetxt(archivo_medidas, Z, fmt='%1.2f', delimiter=';')
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
@@ -723,7 +728,236 @@ def dibujar_3d(Z):
     plt.show()
 
 
+def guardar_configuracion():
+    """
+    Se guardan los datos de configuración del escaneo
+    :return:
+    """
+    global px_mm_x, px_mm_y, px_mm_z
+    global calibracion_base
+    global extremo_izquierdo, extremo_derecho
+    datos = [px_mm_x, px_mm_y, px_mm_z, calibracion_base, extremo_izquierdo, extremo_derecho]
 
+
+contenedor_pestanas = Notebook(vtnPrincipal)
+pestana_calibracion_camara = Frame(contenedor_pestanas)
+pestana_calibracion_velocidad = Frame(contenedor_pestanas)
+pestana_captura_video = Frame(contenedor_pestanas)
+pestana_generacion_3d = Frame(contenedor_pestanas)
+
+contenedor_pestanas.add(pestana_calibracion_camara, text="Cámara")
+contenedor_pestanas.add(pestana_calibracion_velocidad, text="Velocidad")
+contenedor_pestanas.add(pestana_captura_video, text="Video")
+contenedor_pestanas.add(pestana_generacion_3d, text="3D")
+
+contenedor_pestanas.pack()
+
+# region Enlace y calibración de Cámara
+
+btn_ver_camara = Button(pestana_calibracion_camara, text="Ver Camara")
+btn_ver_camara.grid(row=1, column=0, columnspan=2 )
+
+lblf_enlace_camara = LabelFrame(pestana_calibracion_camara, text="1 - Calibración de Cámara")
+lblf_patron = LabelFrame(pestana_calibracion_camara, text="2 - Calibración Eje Z y X")
+lblf_extremos = LabelFrame(pestana_calibracion_camara, text="3 - Calibración de Extremos")
+
+lbl_id_dispositivo = Label( lblf_enlace_camara, text="ID Dispositivo: ")
+txt_id_dispositivo = Entry( lblf_enlace_camara, width=5)
+lbl_umbral = Label(         lblf_enlace_camara, text="Umbral: ")
+txt_umbral = Entry(         lblf_enlace_camara, width=5)
+btn_acceder = Button(       lblf_enlace_camara, text="Calibrar", command=calibrar_camara_laser)
+lbl_conteo = Label(         lblf_enlace_camara, text="Conteo Px:")
+txt_conteo = Entry(         lblf_enlace_camara, width=5)
+lbl_superior = Label(       lblf_enlace_camara, text="Fila:")
+txt_superior = Entry(       lblf_enlace_camara, width=5)
+
+txt_id_dispositivo.insert(0, 0)
+txt_umbral.insert(0, 254)
+txt_conteo.insert(0, 0)
+txt_superior.insert(0, 0)
+
+lblf_enlace_camara.grid(    row=0, column=0)
+
+lbl_id_dispositivo.grid(row=0, column=0, sticky="e")
+txt_id_dispositivo.grid(row=0, column=1, sticky="w")
+lbl_umbral.grid(        row=1, column=0, sticky="e")
+txt_umbral.grid(        row=1, column=1, sticky="w")
+btn_acceder.grid(       row=2, column=0, columnspan=2)
+lbl_conteo.grid(        row=3, column=0, sticky="e")
+txt_conteo.grid(        row=3, column=1, sticky="w")
+lbl_superior.grid(      row=4, column=0, sticky="e")
+txt_superior.grid(      row=4, column=1, sticky="w")
+
+# endregion
+
+# region Calibración con Patrón Eje Z y X
+#lbl_valor = Label(              lblf_patron, text="Valor")
+#lbl_PixelMM = Label(            lblf_patron, text="Px-MM")
+lbl_valor_muestraV = Label(     lblf_patron, text="Z:")
+txt_valor_muestraV = Entry(     lblf_patron, width=7)
+lbl_valor_muestraH = Label(     lblf_patron, text="X:")
+txt_valor_muestraH = Entry(     lblf_patron, width=7)
+txt_pixelmmV = Entry(           lblf_patron, width=7)
+txt_pixelmmH = Entry(           lblf_patron, width=7)
+btn_calibrar_patron = Button(   lblf_patron, text="Calibrar", command=calibrar_patron)
+
+
+txt_valor_muestraV.insert(  0, 10)
+txt_valor_muestraH.insert(  0, 12)
+txt_pixelmmV.insert(        0, 0)
+txt_pixelmmH.insert(        0, 0)
+
+lblf_patron.grid(           row=0, column=1, sticky="n")
+#lbl_valor.grid(             row=0, column=1)
+#lbl_PixelMM.grid(           row=0, column=3)
+lbl_valor_muestraV.grid(    row=1, column=0, sticky="e")
+txt_valor_muestraV.grid(    row=1, column=1, sticky="w")
+lbl_valor_muestraH.grid(    row=2, column=0, sticky="e")
+txt_valor_muestraH.grid(    row=2, column=1, sticky="w")
+txt_pixelmmV.grid(          row=1, column=3, sticky="w")
+txt_pixelmmH.grid(          row=2, column=3, sticky="w")
+btn_calibrar_patron.grid(   row=1, column=2, rowspan=2)
+
+# endregion
+
+# region Calibracion de extremos Izquierdo y Derecho
+
+btn_calibrar_extremos = Button( lblf_extremos, text="Calibrar", command=calibrar_extremos)
+lbl_izquierdo= Label(           lblf_extremos, text="Izquierdo:")
+txt_izquierdo= Entry(           lblf_extremos, width=7)
+lbl_derecho= Label(             lblf_extremos, text="Derecho:")
+txt_derecho= Entry(             lblf_extremos, width=7)
+
+lblf_extremos.grid(         row=0, column=1, sticky="sw")
+btn_calibrar_extremos.grid( row=0, column=0, sticky="w", rowspan=2)
+lbl_izquierdo.grid(         row=0, column=1, sticky="w")
+txt_izquierdo.grid(         row=0, column=2, sticky="w")
+lbl_derecho.grid(           row=1, column=1, sticky="w")
+txt_derecho.grid(           row=1, column=2, sticky="w")
+# endregion
+
+#region Calibracion de Velocidad
+
+lblf_calibrar_patron_velocidad =    LabelFrame(pestana_calibracion_velocidad, text="1- Calibración de Patrón")
+btn_calibrar_velocidad = Button(    lblf_calibrar_patron_velocidad, text="Calibrar Patron Velocidad", command=calibrar_velocidad)
+lbl_patron = Label(                 lblf_calibrar_patron_velocidad, text="Medida Patron:")
+txt_medida_patron_velocidad=Entry(  lblf_calibrar_patron_velocidad, width=5)
+
+lblf_medir_velocidad =              LabelFrame(pestana_calibracion_velocidad, text="2- Medir Velocidad")
+btn_medir_velocidad = Button(       lblf_medir_velocidad, text="Medir Velocidad", command=medir_velocidad)
+lbl_velocidad = Label(              lblf_medir_velocidad, text="velocidad:")
+txt_velocidad = Entry(              lblf_medir_velocidad, width=10)
+
+lblf_calcular_tiempo_espera =       LabelFrame(pestana_calibracion_velocidad, text="3- Calcular Tiempo de Espera")
+lbl_separacion_perfiles = Label(    lblf_calcular_tiempo_espera, text="Separación")
+txt_separacion_perfiles = Entry(    lblf_calcular_tiempo_espera, width=5)
+btn_calcular_tiempo_espera = Button(lblf_calcular_tiempo_espera, text="Calcular Tiempo Espera")
+lbl_tiempo_espera = Label(          lblf_calcular_tiempo_espera, text="t. espera c/mm:")
+txt_tiempo_espera = Entry(          lblf_calcular_tiempo_espera, width=10)
+
+btn_guardar_configuracion = Button( pestana_calibracion_velocidad, text="Guardar Configuración", command=guardar_configuracion)
+
+txt_medida_patron_velocidad.insert(0, 10)
+
+lblf_calibrar_patron_velocidad.grid(    row=0, column=0, sticky="n")
+btn_calibrar_velocidad.grid(            row=0, column=0, columnspan=2)
+lbl_patron.grid(                        row=1, column=0, sticky="e")
+txt_medida_patron_velocidad.grid(       row=1, column=1, sticky="w")
+
+lblf_medir_velocidad.grid(              row=1, column=0, sticky="s")
+btn_medir_velocidad.grid(               row=2, column=0, columnspan=2)
+lbl_velocidad.grid(                     row=3, column=0, sticky="e")
+txt_velocidad.grid(                     row=3, column=1)
+
+lblf_calcular_tiempo_espera.grid(       row=0, column=1, sticky="nw")
+lbl_separacion_perfiles.grid(           row=0, column=0)
+txt_separacion_perfiles.grid(           row=0, column=1)
+btn_calcular_tiempo_espera.grid(        row=1, column=0, columnspan=2)
+lbl_tiempo_espera.grid(                 row=2, column=0, sticky="e")
+txt_tiempo_espera.grid(                 row=2, column=1)
+
+btn_guardar_configuracion.grid(         row=1, column=1)
+
+
+#endregion+
+
+# region Captua de Frames
+lbl_tiempo = Label(                 pestana_captura_video, text="Tiempo espera:")
+txt_tiempo = Entry(                 pestana_captura_video, width=10)
+lbl_nombre_video = Label(           pestana_captura_video, text="Nombre Video:")
+txt_nombre_video = Entry(           pestana_captura_video)
+btn_capturar = Button(              pestana_captura_video, text="Capturar Video", command=capturar_video)
+
+txt_tiempo.insert(          0, "")
+txt_nombre_video.insert(    0, "")
+
+lbl_tiempo.grid(                row=0, column=0, sticky="e")
+txt_tiempo.grid(                row=0, column=1, sticky="w")
+lbl_nombre_video.grid(          row=1, column=0, sticky="e")
+txt_nombre_video.grid(          row=1, column=1, sticky="w")
+btn_capturar.grid(              row=2, column=0)
+
+
+# endregion
+
+# region Medición y Generación 3D
+lblf_buscar_configuracion = LabelFrame(pestana_generacion_3d, text="1 - Cargar Configuración")
+btn_buscar_configuracion = Button(lblf_buscar_configuracion, text="Cargar Configuración")
+lbl_x = Label(      lblf_buscar_configuracion, text="X")
+lbl_z = Label(      lblf_buscar_configuracion, text="Z")
+lbl_y = Label(      lblf_buscar_configuracion, text="Y")
+lbl_iz = Label(     lblf_buscar_configuracion, text="Izquierdo")
+lbl_der = Label(    lblf_buscar_configuracion, text="Derecho")
+lbl_base = Label(   lblf_buscar_configuracion, text="Base")
+txt_x = Entry(      lblf_buscar_configuracion, width=10)
+txt_z = Entry(      lblf_buscar_configuracion, width=10)
+txt_y = Entry(      lblf_buscar_configuracion, width=10)
+txt_iz = Entry(     lblf_buscar_configuracion, width=10)
+txt_der = Entry(    lblf_buscar_configuracion, width=10)
+txt_base = Entry(   lblf_buscar_configuracion, width=10)
+
+
+lblf_buscar_video = LabelFrame( pestana_generacion_3d, text="2 - Cargar Video")
+btn_buscar_video = Button(    lblf_buscar_video, text='Cargar Video', command=buscar_video)
+lbl_video = Label(              lblf_buscar_video, text="Video")
+txt_video = Entry(              lblf_buscar_video, width=10)
+
+
+btn_generar3D = Button(             pestana_generacion_3d, text="Generar 3D", command=generar_3d)
+
+txt_x.insert(0, 0.1518)
+txt_y.insert(0, 1)
+txt_z.insert(0, 0.1960)
+txt_iz.insert(0, 13)
+txt_der.insert(0, 625)
+txt_base.insert(0, 451)
+
+lblf_buscar_configuracion.grid( row=0, column=0, sticky="n")
+btn_buscar_configuracion.grid(  row=1, column=0, sticky="we", columnspan=4)
+lbl_x.grid(                     row=2, column=0, sticky="we")
+txt_x.grid(                     row=2, column=1, sticky="we")
+lbl_z.grid(                     row=3, column=0, sticky="we")
+txt_z.grid(                     row=3, column=1, sticky="we")
+lbl_y.grid(                     row=4, column=0, sticky="we")
+txt_y.grid(                     row=4, column=1, sticky="we")
+lbl_iz.grid(                    row=2, column=2, sticky="we")
+txt_iz.grid(                    row=2, column=3, sticky="we")
+lbl_der.grid(                   row=3, column=2, sticky="we")
+txt_der.grid(                   row=3, column=3, sticky="we")
+lbl_base.grid(                  row=4, column=2, sticky="we")
+txt_base.grid(                  row=4, column=3, sticky="we")
+
+lblf_buscar_video.grid(         row=0, column=1, sticky="n")
+btn_buscar_video.grid(        row=1, column=0, columnspan=2)
+lbl_video.grid(                 row=2, column=0, sticky="we")
+txt_video.grid(                 row=2, column=1, sticky="we")
+
+btn_generar3D.grid(             row=0, column=1, sticky="s")
+
+
+# endregion
+
+"""
 lblf_enlace_camara = LabelFrame(vtnPrincipal, text="1 - Enlace y calibración de Cámara")
 lblf_patron = LabelFrame(vtnPrincipal, text="2 - Calibración con Patrón Eje Z y X")
 lblf_Velocidad = LabelFrame(vtnPrincipal, text="3 - Calibración de Velocidad")
@@ -837,8 +1071,9 @@ lbl_velocidad = Label(              lblf_Velocidad, text="velocidad:")
 txt_velocidad = Entry(              lblf_Velocidad, width=10)
 lbl_tiempo_espera = Label(          lblf_Velocidad, text="t. espera c/mm:")
 txt_tiempo_espera = Entry(          lblf_Velocidad, width=10)
+btn_guardar_configuracion = Button( lblf_captura_frames, text="Guardar Configuración", command=guardar_configuracion)
 
-txt_medida_patron_velocidad.insert(0,10)
+txt_medida_patron_velocidad.insert(0, 10)
 
 lblf_Velocidad.grid(                row=13, column=0, sticky="we")
 btn_calibrar_velocidad.grid(        row=22, column=0, columnspan=2)
@@ -849,7 +1084,7 @@ lbl_velocidad.grid(                 row=25, column=0, sticky="e")
 txt_velocidad.grid(                 row=25, column=1)
 lbl_tiempo_espera.grid(             row=26, column=0, sticky="e")
 txt_tiempo_espera.grid(             row=26, column=1)
-
+btn_guardar_configuracion.grid(     row=27, column=0, columnspan=2)
 # endregion
 
 # region 4 - Captua de Frames
@@ -858,6 +1093,7 @@ txt_tiempo = Entry(                 lblf_captura_frames, width=10)
 lbl_nombre_video = Label(           lblf_captura_frames, text="Nombre Video:")
 txt_nombre_video = Entry(           lblf_captura_frames)
 btn_capturar = Button(              lblf_captura_frames, text="Capturar Video", command=capturar_video)
+
 
 txt_tiempo.insert(          0, "")
 txt_nombre_video.insert(    0, "")
@@ -868,7 +1104,8 @@ lbl_tiempo.grid(                row=24, column=0, sticky="e")
 txt_tiempo.grid(                row=24, column=1, sticky="w")
 lbl_nombre_video.grid(          row=25, column=0, sticky="e")
 txt_nombre_video.grid(          row=25, column=1, sticky="w")
-btn_capturar.grid(              row=26, column=0, columnspan=2)
+btn_capturar.grid(              row=26, column=0)
+
 
 # endregion
 
@@ -892,12 +1129,12 @@ txt_video = Entry(  lblf_generacion3D, width=10)
 btn_buscar_archivo = Button(        lblf_generacion3D, text='Buscar Video', command=buscar_video)
 btn_generar3D = Button(             lblf_generacion3D, text="Generar 3D", command=generar_3d)
 
-txt_x.insert(0,0.162)
-txt_y.insert(0,1)
-txt_z.insert(0,0.188)
-txt_iz.insert(0,20)
-txt_der.insert(0,636)
-txt_base.insert(0,444)
+txt_x.insert(0, 0.1518)
+txt_y.insert(0, 1)
+txt_z.insert(0, 0.1960)
+txt_iz.insert(0, 13)
+txt_der.insert(0, 625)
+txt_base.insert(0, 451)
 
 lblf_generacion3D.grid(         row=30, column=0, sticky="we")
 lbl_x.grid(                     row=30, column=0, sticky="we")
@@ -919,4 +1156,5 @@ btn_generar3D.grid(             row=38, column=0, columnspan=2)
 
 
 # endregion
+"""
 vtnPrincipal.mainloop()

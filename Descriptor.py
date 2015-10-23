@@ -270,7 +270,6 @@ def etiquetar():
                           )
 
 
-
 def etiquetado_vecindad(matriz):
     global etiqueta_actual
     global padres_hijos
