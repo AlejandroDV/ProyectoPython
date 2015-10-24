@@ -29,7 +29,7 @@ imagen_descriptiva = None
 regiones = []
 etiquetas = []
 etiqueta_actual = 0
-padres_hijos=[]
+padres_hijos = []
 
 
 def buscar_datos_config():

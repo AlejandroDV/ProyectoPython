@@ -46,10 +46,15 @@ video = None
 extremo_izquierdo = 0
 extremo_derecho = 0
 nombre_video = ""
+tiempo_espera = 0.0
+inf_velocidad = 0
 
 
 def calibrar_camara_laser():
-    '''Calibración de cámara y detección de Láser'''
+    """
+    Calibración de cámara y detección de Láser
+    :return:
+    """
     global id_dispositivo
     global calibracion_base
     global medidas
@@ -71,10 +76,16 @@ def calibrar_camara_laser():
                 tkMessageBox.showerror("Error", "Verifique linea láser")
             frames += 1
         camara.release()
+        btn_calibrar_patron.config(state=NORMAL)
+        btn_calibrar_extremos.config(state=NORMAL)
+        btn_calibrar_velocidad.config(state=NORMAL)
 
 
 def calibrar_patron():
-    '''Calibración Vertical y Horizontal del patron'''
+    """
+    Calibración Vertical y Horizontal del patron
+    :return:
+    """
     global id_dispositivo
     global px_mm_z
     global px_mm_x
@@ -121,7 +132,10 @@ def calibrar_patron():
 
 
 def control_calibrar_patron():
-    ''' Medición de prueba en Vertical y Horizontal'''
+    """
+    Medición de prueba en Vertical y Horizontal
+    :return:
+    """
     global id_dispositivo
     global px_mm_z
     global px_mm_x
@@ -152,10 +166,10 @@ def control_calibrar_patron():
                 medida_h = diferencia_h * px_mm_x
                 # endregion
 
-                txt_medidaV.delete(0, END)
-                txt_medidaV.insert(0, medida_v)
-                txt_medidaH.delete(0, END)
-                txt_medidaH.insert(0, medida_h)
+                #txt_medidaV.delete(0, END)
+                #txt_medidaV.insert(0, medida_v)
+                #txt_medidaH.delete(0, END)
+                #txt_medidaH.insert(0, medida_h)
                 vtnPrincipal.update()
                 cv2.imshow('Esqueleto', flaco)
             else:
@@ -235,7 +249,7 @@ def esqueletizador(imagen_color, calibracion):
                 break
         if inicial == 0:
             # la columna está vacia
-            if extremo_izquierdo !=0 and extremo_derecho !=0:
+            if extremo_izquierdo != 0 and extremo_derecho != 0:
                 if calibracion_base == 0:
                     # si no se calibró la línea base
                     flaco[alto - 2, c] = 0
@@ -354,16 +368,15 @@ def validador_datos():
 
 def calibrar_velocidad():
     """
-
+        Se realiza la calibración de las líneas de velocidad
     :return:
     """
     global inf_velocidad
     global camara
     global id_dispositivo
-    frames = 0
-    # while frames < 150:
+
     id_dispositivo = int(txt_id_dispositivo.get())
-    if not cv2.VideoCapture(int(txt_id_dispositivo.get())).read()[0]:
+    if not cv2.VideoCapture(id_dispositivo).read()[0]:
         tkMessageBox.showerror("Error", "No se detectó la Cámara")
     else:
         camara = cv2.VideoCapture(id_dispositivo)
@@ -373,13 +386,12 @@ def calibrar_velocidad():
             inf_velocidad = detector_lineas_velocidad(frame)[1]
             frames += 1
             cv2.waitKey(1)
-            #if cv2.waitKey(33) & 0xFF == ord('q'):
-             #   break
             frames += 1
         cv2.destroyWindow("Color")
         cv2.destroyWindow("subcolor")
         cv2.destroyWindow("Binario")
         camara.release()
+        btn_medir_velocidad.config(state=NORMAL)
 
 
 def medir_velocidad():
@@ -393,7 +405,7 @@ def medir_velocidad():
     global camara
     patron = 0.0
     id_dispositivo = int(txt_id_dispositivo.get())
-    if not cv2.VideoCapture(int(txt_id_dispositivo.get())).read()[0]:
+    if not cv2.VideoCapture(id_dispositivo).read()[0]:
         tkMessageBox.showerror("Error", "No se detectó la Cámara")
     else:
         camara = cv2.VideoCapture(id_dispositivo)
@@ -425,16 +437,17 @@ def medir_velocidad():
         t_trancurrido = (t_final - t_incial).total_seconds()
         #print t_trancurrido
         velocidad = patron / t_trancurrido
-        tiempo_espera = t_trancurrido / 10
+        #tiempo_espera = t_trancurrido / 10
 
         txt_velocidad.delete(0, END)
         txt_velocidad.insert(0, str('{0:.3g}'.format(velocidad)) + " mm/seg")
-        txt_tiempo_espera.delete(0, END)
-        txt_tiempo_espera.insert(0, str(tiempo_espera) + " seg")
-        txt_tiempo.delete(0, END)
-        txt_tiempo.insert(0,tiempo_espera)
+        #txt_tiempo_espera.delete(0, END)
+        #txt_tiempo_espera.insert(0, str(tiempo_espera) + " seg")
+        #txt_tiempo_espera.delete(0, END)
+        #txt_tiempo_espera.insert(0,tiempo_espera)
 
     camara.release()
+    btn_calcular_tiempo_espera.config(state=NORMAL)
 
 
 def detector_lineas_velocidad(color):
@@ -447,7 +460,7 @@ def detector_lineas_velocidad(color):
     #if camara is None:
     #    camara = cv2.VideoCapture(int(txt_id_dispositivo.get()))
     #ret, color = camara.read()
-    supinf = [0, 0]
+    #supinf = [0, 0]
     cv2.imshow('Color', color)
     # sub_color = color[190:290, 270:370]
     sub_color = color[350:450, 270:370]
@@ -480,6 +493,7 @@ def capturar_video():
     """
     global camara
     global id_dispositivo
+    global tiempo_espera
     if not cv2.VideoCapture(int(txt_id_dispositivo.get())).read()[0]:
         tkMessageBox.showerror("Error", "No se detectó la Cámara")
     else:
@@ -489,25 +503,23 @@ def capturar_video():
         else:
             nombre = txt_nombre_video.get() + '.avi'
 
-        if len(txt_tiempo.get()) == 0:
-            tiempo = 1.0
-        else:
-            tiempo = float(txt_tiempo.get())
+        if tiempo_espera == 0:
+            tiempo_espera = 1.0
         fourcc = cv2.cv.CV_FOURCC(*'XVID')
         out = cv2.VideoWriter(nombre, fourcc, 20.0, (640, 480))
         while True:
-            time.sleep(tiempo)
+            time.sleep(tiempo_espera)
             ret, color = camara.read()
             out.write(color)
             cv2.imshow('Color', color)
             if cv2.waitKey(33) & 0xFF == ord('q'):
                 break
-
         camara.release()
 
 
 def buscar_video():
     """
+    Se solicita la selección de un archivo de video al usuario
     :return:
     """
     global video
@@ -518,23 +530,6 @@ def buscar_video():
 
         nombre_video = file.name
         txt_video.insert(0, file.name)
-        """
-        cap = cv.CaptureFromFile(file.name)
-        video = cap
-        nframes = int(cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FRAME_COUNT))
-        fps = int(cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FPS))
-        print "total frame", nframes
-        print "fps", fps
-        print ' currpos of videofile', cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_POS_MSEC)
-        txt_video.delete(0, END)
-        txt_video.insert(0, file.name)
-        try:
-            waitpermillisecond = int(1 * 1000 / fps)
-            print "waitpermillisecond", waitpermillisecond
-        except:
-            pass
-        print cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FOURCC)
-        """
 
 
 def reproducir_video():
@@ -543,7 +538,7 @@ def reproducir_video():
     :return:
     """
     global video
-    if video == None:
+    if video is None:
         tkMessageBox.showerror("Error", "No se seleccionó el video")
     else:
         nframes = int(cv.GetCaptureProperty(video, cv.CV_CAP_PROP_FRAME_COUNT))
@@ -574,7 +569,7 @@ def generar_3d():
 
         while video.isOpened():
             ret, frame = video.read()
-            if frame != None:
+            if frame is not None:
                 flaco = esqueletizador(frame, False)
                 cv2.imshow('Flaco', flaco)
                 vector = medicion_perfil(flaco, columnas)
@@ -602,7 +597,7 @@ def medicion_perfil(imagen, columnas):
 
     superior = detectar_extremos(imagen, "n")[0]
     #print superior, calibracion_base
-    alto, largo = imagen.shape[:2]
+    #alto, largo = imagen.shape[:2]
     for c in range(extremo_izquierdo, extremo_derecho + 1, 1):
         for f in range(superior, calibracion_base, 1):
             if imagen[f, c] == 0:
@@ -624,62 +619,62 @@ def validar_datos_generar_3d():
     global extremo_izquierdo
 
     resultado = True
-    mensaje=""
+    mensaje = ""
 
     if px_mm_y == 0:
         if len(txt_y.get()) == 0:
             mensaje = "No se conoce la el patron Y\n"
-            resultado=False
+            resultado = False
         else:
             px_mm_y = float(txt_y.get())
 
     if px_mm_x == 0:
         if len(txt_x.get()) == 0:
-            mensaje = mensaje + "No se conoce el patron en X\n"
-            resultado=False
+            mensaje += "No se conoce el patron en X\n"
+            resultado = False
         else:
             px_mm_x = float(txt_x.get())
 
     if px_mm_z == 0:
         if len(txt_z.get()) == 0:
-            mensaje = mensaje + "No se conoce el patron en Z\n"
-            resultado=False
+            mensaje += "No se conoce el patron en Z\n"
+            resultado = False
         else:
             px_mm_z = float(txt_z.get())
 
     if calibracion_base == 0:
-        if len(txt_base.get()) ==0:
-            mensaje = mensaje + "No se conoce la linea base\n"
-            resultado=False
+        if len(txt_base.get()) == 0:
+            mensaje += "No se conoce la linea base\n"
+            resultado = False
         else:
             try:
                 calibracion_base = int(txt_base.get())
-            except:
+            except(ValueError, TypeError):
                 tkMessageBox.showerror("Error de tipo", "El valor de Base debe ser un entero")
 
     if extremo_izquierdo == 0:
-        if len(txt_iz.get()) ==0:
-            mensaje = mensaje + "No se conoce el extremo izquierdo\n"
-            resultado=False
+        if len(txt_iz.get()) == 0:
+            mensaje += "No se conoce el extremo izquierdo\n"
+            resultado = False
         else:
             try:
                 extremo_izquierdo = int(txt_iz.get())
-            except:
+            except(ValueError, TypeError):
                 tkMessageBox.showerror("Error de tipo", "El valor de Extremo Izquierdo debe ser un entero")
 
     if extremo_derecho == 0:
-        if len(txt_der.get()) ==0:
-            mensaje = mensaje + "No se conoce el extremo derecho\n"
-            resultado=False
+        if len(txt_der.get()) == 0:
+            mensaje += "No se conoce el extremo derecho\n"
+            resultado = False
         else:
             try:
                 extremo_derecho = int(txt_der.get())
-            except:
+            except(ValueError, TypeError):
                 tkMessageBox.showerror("Error de tipo", "El valor de Extremo Izquierdo debe ser un entero")
 
     if video is None:
-        mensaje = mensaje + "No se cargó el video\n"
-        resultado=False
+        mensaje += "No se cargó el video\n"
+        resultado = False
 
     if not resultado:
         tkMessageBox.showerror("Error", mensaje)
@@ -687,36 +682,31 @@ def validar_datos_generar_3d():
     return resultado
 
 
-def dibujar_3d(Z):
+def dibujar_3d(z):
     global px_mm_x
     global px_mm_y
     global nombre_video
 
-    alto, largo = Z.shape[:2]
-    X = np.zeros(largo)
-    Y = np.zeros(alto)
+    alto, largo = z.shape[:2]
+    x = np.zeros(largo)
+    y = np.zeros(alto)
 
     for c in range(len(X)):
-        X[c] = px_mm_x * c
+        x[c] = px_mm_x * c
 
     for c in range(len(Y)):
-        Y[c] = px_mm_y * c
+        y[c] = px_mm_y * c
 
-    #print "X ", len(X), X
-    #print "Y", len(Y), Y
-    #print "Z", Z.shape
-
-
-    archivo_medidas = nombre_video+"-medidas.txt"
-    np.savetxt(archivo_medidas, Z, fmt='%1.2f', delimiter=';')
+    archivo_medidas = nombre_video + "-medidas.txt"
+    np.savetxt(archivo_medidas, z, fmt='%1.2f', delimiter=';')
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
-    X, Y = np.meshgrid(X, Y)
+    x, y = np.meshgrid(x, y)
 
     # Tipo de gráfico
-    surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    surf = ax.plot_surface(x, y, z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 
     # configuraciones del eje z
     ax.set_zlim(-1.01, 15)
@@ -733,29 +723,122 @@ def guardar_configuracion():
     Se guardan los datos de configuración del escaneo
     :return:
     """
-    global px_mm_x, px_mm_y, px_mm_z
+    global px_mm_x
+    global px_mm_y
+    global px_mm_z
     global calibracion_base
-    global extremo_izquierdo, extremo_derecho
-    datos = [px_mm_x, px_mm_y, px_mm_z, calibracion_base, extremo_izquierdo, extremo_derecho]
+    global extremo_izquierdo
+    global extremo_derecho
+    try:
+        datos = [px_mm_x, px_mm_y, px_mm_z, calibracion_base, extremo_izquierdo, extremo_derecho]
+        np.savetxt("Configuracion.txt", datos, fmt='%1.3f', delimiter=';')
+        tkMessageBox.showinfo("Atención", "Se guardo el archivo de configuración de escaneo")
+    except:
+        tkMessageBox.showerror("Error", "Error al escribir el archivo de configuración de escaneo")
 
+
+def ver_camara():
+    """
+    visualización de la señal de video sin procesamiento
+    :return:
+    """
+    try:
+        id_disp = int(txt_id_dispositivo.get())
+        if not cv2.VideoCapture(id_disp).read()[0]:
+            tkMessageBox.showerror("Error", "No se detectó la Cámara")
+        else:
+            camara = cv2.VideoCapture(id_disp)
+            for i in range(200):
+                ret, frame = camara.read()
+                cv2.imshow('Camara', frame)
+                cv2.waitKey(1)
+                if cv2.waitKey(33) & 0xFF == ord('q'):
+                    cv2.destroyWindow('Camara')
+                    break
+            cv2.destroyWindow('Camara')
+            camara.release()
+    except (ValueError, TypeError):
+        tkMessageBox.showerror("Error", "Verificar el ID de la Cámara")
+
+
+def calcular_tiempo_espera():
+    """
+    Se calcula el tiempo de espera en función de la separación entre perfiles de escaneo
+    :return:
+    """
+    global tiempo_espera
+    global velocidad
+    global px_mm_y
+    try:
+        if velocidad != 0.0:
+            separacion = float(txt_separacion_perfiles.get())
+            px_mm_y = separacion
+            tiempo_espera = '%.3f' % (separacion / velocidad)
+            txt_tiempo_espera.delete(0, END)
+            txt_tiempo_espera.insert(0, tiempo_espera)
+            btn_capturar_video.config(state=NORMAL)
+        else:
+            tkMessageBox.showwarning('Atención', "La velocidad no fué determinada")
+    except (ValueError, TypeError):
+        tkMessageBox.showerror("Error", "Verifique el Valor de Separación")
+
+
+def cargar_configuracion():
+    global px_mm_x
+    global px_mm_y
+    global px_mm_z
+    global calibracion_base
+    global extremo_izquierdo
+    global extremo_derecho
+    global medidas
+    try:
+        archivo = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar el archivo con los Datos de Configuracion')
+        if archivo:
+            with open(archivo.name, "r") as ins:
+                array = []
+                for line in ins:
+                    array.append(float(line))
+
+            px_mm_x = array[0]
+            px_mm_y = array[1]
+            px_mm_z = array[2]
+            calibracion_base = array[3]
+            extremo_izquierdo = array[4]
+            extremo_derecho = array[5]
+
+            txt_x.delete(0, END)
+            txt_x.insert(0, px_mm_x)
+            txt_y.delete(0, END)
+            txt_y.insert(0, px_mm_y)
+            txt_z.delete(0, END)
+            txt_z.insert(0, px_mm_z)
+            txt_base.delete(0, END)
+            txt_base.insert(0, calibracion_base)
+            txt_iz.delete(0, END)
+            txt_iz.insert(0, extremo_izquierdo)
+            txt_der.delete(0, END)
+            txt_der.insert(0, extremo_derecho)
+
+    except ValueError:
+        tkMessageBox.showerror("Error", "Verifique el archivo seleccionado")
+    except:
+        tkMessageBox.showerror("Error", "Error Inesperado")
 
 contenedor_pestanas = Notebook(vtnPrincipal)
 pestana_calibracion_camara = Frame(contenedor_pestanas)
 pestana_calibracion_velocidad = Frame(contenedor_pestanas)
-pestana_captura_video = Frame(contenedor_pestanas)
 pestana_generacion_3d = Frame(contenedor_pestanas)
 
 contenedor_pestanas.add(pestana_calibracion_camara, text="Cámara")
 contenedor_pestanas.add(pestana_calibracion_velocidad, text="Velocidad")
-contenedor_pestanas.add(pestana_captura_video, text="Video")
 contenedor_pestanas.add(pestana_generacion_3d, text="3D")
 
 contenedor_pestanas.pack()
 
 # region Enlace y calibración de Cámara
 
-btn_ver_camara = Button(pestana_calibracion_camara, text="Ver Camara")
-btn_ver_camara.grid(row=1, column=0, columnspan=2 )
+btn_ver_camara = Button(pestana_calibracion_camara, text="Ver Camara", command=ver_camara)
+btn_ver_camara.grid(row=1, column=0, columnspan=2)
 
 lblf_enlace_camara = LabelFrame(pestana_calibracion_camara, text="1 - Calibración de Cámara")
 lblf_patron = LabelFrame(pestana_calibracion_camara, text="2 - Calibración Eje Z y X")
@@ -799,7 +882,7 @@ lbl_valor_muestraH = Label(     lblf_patron, text="X:")
 txt_valor_muestraH = Entry(     lblf_patron, width=7)
 txt_pixelmmV = Entry(           lblf_patron, width=7)
 txt_pixelmmH = Entry(           lblf_patron, width=7)
-btn_calibrar_patron = Button(   lblf_patron, text="Calibrar", command=calibrar_patron)
+btn_calibrar_patron = Button(   lblf_patron, text="Calibrar", command=calibrar_patron, state=DISABLED)
 
 
 txt_valor_muestraV.insert(  0, 10)
@@ -822,11 +905,11 @@ btn_calibrar_patron.grid(   row=1, column=2, rowspan=2)
 
 # region Calibracion de extremos Izquierdo y Derecho
 
-btn_calibrar_extremos = Button( lblf_extremos, text="Calibrar", command=calibrar_extremos)
-lbl_izquierdo= Label(           lblf_extremos, text="Izquierdo:")
-txt_izquierdo= Entry(           lblf_extremos, width=7)
-lbl_derecho= Label(             lblf_extremos, text="Derecho:")
-txt_derecho= Entry(             lblf_extremos, width=7)
+btn_calibrar_extremos = Button( lblf_extremos, text="Calibrar", command=calibrar_extremos, state=DISABLED)
+lbl_izquierdo = Label(           lblf_extremos, text="Izquierdo:")
+txt_izquierdo = Entry(           lblf_extremos, width=7)
+lbl_derecho = Label(             lblf_extremos, text="Derecho:")
+txt_derecho = Entry(             lblf_extremos, width=7)
 
 lblf_extremos.grid(         row=0, column=1, sticky="sw")
 btn_calibrar_extremos.grid( row=0, column=0, sticky="w", rowspan=2)
@@ -839,21 +922,27 @@ txt_derecho.grid(           row=1, column=2, sticky="w")
 #region Calibracion de Velocidad
 
 lblf_calibrar_patron_velocidad =    LabelFrame(pestana_calibracion_velocidad, text="1- Calibración de Patrón")
-btn_calibrar_velocidad = Button(    lblf_calibrar_patron_velocidad, text="Calibrar Patron Velocidad", command=calibrar_velocidad)
+btn_calibrar_velocidad = Button(    lblf_calibrar_patron_velocidad, text="Calibrar Patron Velocidad", command=calibrar_velocidad, state=DISABLED)
 lbl_patron = Label(                 lblf_calibrar_patron_velocidad, text="Medida Patron:")
-txt_medida_patron_velocidad=Entry(  lblf_calibrar_patron_velocidad, width=5)
+txt_medida_patron_velocidad = Entry(  lblf_calibrar_patron_velocidad, width=5)
 
 lblf_medir_velocidad =              LabelFrame(pestana_calibracion_velocidad, text="2- Medir Velocidad")
-btn_medir_velocidad = Button(       lblf_medir_velocidad, text="Medir Velocidad", command=medir_velocidad)
+btn_medir_velocidad = Button(       lblf_medir_velocidad, text="Medir Velocidad", command=medir_velocidad, state=DISABLED)
 lbl_velocidad = Label(              lblf_medir_velocidad, text="velocidad:")
 txt_velocidad = Entry(              lblf_medir_velocidad, width=10)
 
 lblf_calcular_tiempo_espera =       LabelFrame(pestana_calibracion_velocidad, text="3- Calcular Tiempo de Espera")
 lbl_separacion_perfiles = Label(    lblf_calcular_tiempo_espera, text="Separación")
 txt_separacion_perfiles = Entry(    lblf_calcular_tiempo_espera, width=5)
-btn_calcular_tiempo_espera = Button(lblf_calcular_tiempo_espera, text="Calcular Tiempo Espera")
+btn_calcular_tiempo_espera = Button(lblf_calcular_tiempo_espera, text="Calcular Tiempo Espera", command=calcular_tiempo_espera, state=DISABLED)
 lbl_tiempo_espera = Label(          lblf_calcular_tiempo_espera, text="t. espera c/mm:")
 txt_tiempo_espera = Entry(          lblf_calcular_tiempo_espera, width=10)
+
+lblf_captura_video =    LabelFrame(pestana_calibracion_velocidad, text="4- Captura de Video")
+lbl_nombre_video = Label(           lblf_captura_video, text="Nombre Video:")
+txt_nombre_video = Entry(           lblf_captura_video, width=10)
+btn_capturar_video = Button(              lblf_captura_video, text="Capturar Video", command=capturar_video, state=DISABLED)
+txt_nombre_video.insert(    0, "")
 
 btn_guardar_configuracion = Button( pestana_calibracion_velocidad, text="Guardar Configuración", command=guardar_configuracion)
 
@@ -876,33 +965,19 @@ btn_calcular_tiempo_espera.grid(        row=1, column=0, columnspan=2)
 lbl_tiempo_espera.grid(                 row=2, column=0, sticky="e")
 txt_tiempo_espera.grid(                 row=2, column=1)
 
-btn_guardar_configuracion.grid(         row=1, column=1)
+lblf_captura_video.grid(                row=1, column=1, sticky="e")
+lbl_nombre_video.grid(                  row=1, column=0, sticky="e")
+txt_nombre_video.grid(                  row=1, column=1, sticky="w")
+btn_capturar_video.grid(                      row=2, column=0)
+
+btn_guardar_configuracion.grid(         row=2, column=0, columnspan=2)
 
 
 #endregion+
 
-# region Captua de Frames
-lbl_tiempo = Label(                 pestana_captura_video, text="Tiempo espera:")
-txt_tiempo = Entry(                 pestana_captura_video, width=10)
-lbl_nombre_video = Label(           pestana_captura_video, text="Nombre Video:")
-txt_nombre_video = Entry(           pestana_captura_video)
-btn_capturar = Button(              pestana_captura_video, text="Capturar Video", command=capturar_video)
-
-txt_tiempo.insert(          0, "")
-txt_nombre_video.insert(    0, "")
-
-lbl_tiempo.grid(                row=0, column=0, sticky="e")
-txt_tiempo.grid(                row=0, column=1, sticky="w")
-lbl_nombre_video.grid(          row=1, column=0, sticky="e")
-txt_nombre_video.grid(          row=1, column=1, sticky="w")
-btn_capturar.grid(              row=2, column=0)
-
-
-# endregion
-
 # region Medición y Generación 3D
 lblf_buscar_configuracion = LabelFrame(pestana_generacion_3d, text="1 - Cargar Configuración")
-btn_buscar_configuracion = Button(lblf_buscar_configuracion, text="Cargar Configuración")
+btn_buscar_configuracion = Button(lblf_buscar_configuracion, text="Cargar Configuración", command=cargar_configuracion)
 lbl_x = Label(      lblf_buscar_configuracion, text="X")
 lbl_z = Label(      lblf_buscar_configuracion, text="Z")
 lbl_y = Label(      lblf_buscar_configuracion, text="Y")
@@ -948,213 +1023,12 @@ lbl_base.grid(                  row=4, column=2, sticky="we")
 txt_base.grid(                  row=4, column=3, sticky="we")
 
 lblf_buscar_video.grid(         row=0, column=1, sticky="n")
-btn_buscar_video.grid(        row=1, column=0, columnspan=2)
+btn_buscar_video.grid(          row=1, column=0, columnspan=2)
 lbl_video.grid(                 row=2, column=0, sticky="we")
 txt_video.grid(                 row=2, column=1, sticky="we")
 
-btn_generar3D.grid(             row=0, column=1, sticky="s")
-
-
-# endregion
-
-"""
-lblf_enlace_camara = LabelFrame(vtnPrincipal, text="1 - Enlace y calibración de Cámara")
-lblf_patron = LabelFrame(vtnPrincipal, text="2 - Calibración con Patrón Eje Z y X")
-lblf_Velocidad = LabelFrame(vtnPrincipal, text="3 - Calibración de Velocidad")
-lblf_captura_frames = LabelFrame(vtnPrincipal, text="4 - Captura de Video")
-lblf_generacion3D = LabelFrame(vtnPrincipal, text="5 - Medición y Generación 3D")
-
-
-# region 1 - Enlace y calibración de Cámara
-lbl_id_dispositivo = Label( lblf_enlace_camara, text="ID Dispositivo: ")
-txt_id_dispositivo = Entry( lblf_enlace_camara, width=5)
-lbl_umbral = Label(         lblf_enlace_camara, text="Umbral: ")
-txt_umbral = Entry(         lblf_enlace_camara, width=5)
-btn_acceder = Button(       lblf_enlace_camara, text="Enlazar y Calibrar", command=calibrar_camara_laser)
-lbl_conteo = Label(         lblf_enlace_camara, text="Conteo Px:")
-txt_conteo = Entry(         lblf_enlace_camara, width=5)
-lbl_superior = Label(       lblf_enlace_camara, text="Fila:")
-txt_superior = Entry(       lblf_enlace_camara, width=5)
-
-txt_id_dispositivo.insert(0, 0)
-txt_umbral.insert(0, 254)
-txt_conteo.insert(0, 0)
-txt_superior.insert(0, 0)
-
-lblf_enlace_camara.grid(row=0, column=0, sticky="we")
-
-lbl_id_dispositivo.grid(row=0, column=0, sticky="e")
-txt_id_dispositivo.grid(row=0, column=1, sticky="w")
-lbl_umbral.grid(        row=1, column=0, sticky="e")
-txt_umbral.grid(        row=1, column=1, sticky="w")
-btn_acceder.grid(       row=2, column=0, columnspan=2)
-lbl_conteo.grid(        row=3, column=0, sticky="e")
-txt_conteo.grid(        row=3, column=1, sticky="w")
-lbl_superior.grid(      row=4, column=0, sticky="e")
-txt_superior.grid(      row=4, column=1, sticky="w")
+btn_generar3D.grid(             row=1, column=0, columnspan=2)
 
 # endregion
 
-# region 2 - Calibración con Patrón Eje Z y X
-lbl_valor = Label(              lblf_patron, text="Valor")
-lbl_PixelMM = Label(            lblf_patron, text="Px-MM")
-lbl_valor_muestraV = Label(     lblf_patron, text="Z:")
-txt_valor_muestraV = Entry(     lblf_patron, width=7)
-lbl_valor_muestraH = Label(     lblf_patron, text="X:")
-txt_valor_muestraH = Entry(     lblf_patron, width=7)
-txt_pixelmmV = Entry(           lblf_patron, width=7)
-txt_pixelmmH = Entry(           lblf_patron, width=7)
-btn_calibrar_patron = Button(   lblf_patron, text="C", command=calibrar_patron)
-
-
-txt_valor_muestraV.insert(  0, 10)
-txt_valor_muestraH.insert(  0, 12)
-txt_pixelmmV.insert(        0, 0)
-txt_pixelmmH.insert(        0, 0)
-
-lblf_patron.grid(           row=6, column=0, sticky="we")
-lbl_valor.grid(             row=6, column=1)
-lbl_PixelMM.grid(           row=6, column=3)
-lbl_valor_muestraV.grid(    row=7, column=0, sticky="e")
-txt_valor_muestraV.grid(    row=7, column=1, sticky="w")
-lbl_valor_muestraH.grid(    row=8, column=0, sticky="e")
-txt_valor_muestraH.grid(    row=8, column=1, sticky="w")
-txt_pixelmmV.grid(          row=7, column=3, sticky="w")
-txt_pixelmmH.grid(          row=8, column=3, sticky="w")
-btn_calibrar_patron.grid(   row=7, column=2, rowspan=2)
-
-# endregion
-
-# region 2 - Prueba Medición Total en Z y X
-
-btn_medir = Button(     lblf_patron, text="Control", command=control_calibrar_patron)
-lbl_medidaV = Label(    lblf_patron, text="Z:")
-txt_medidaV = Entry(    lblf_patron, width=5)
-lbl_mmV = Label(        lblf_patron, text="mm")
-lbl_medidaH = Label(    lblf_patron, text="X:")
-txt_medidaH = Entry(    lblf_patron, width=5)
-lbl_mmH = Label(        lblf_patron, text="mm")
-
-txt_medidaV.insert(0, 0)
-txt_medidaH.insert(0, 0)
-
-btn_medir.grid(         row=9, column=0, rowspan=2)
-lbl_medidaV.grid(       row=9, column=1, sticky="e")
-txt_medidaV.grid(       row=9, column=2, sticky="w")
-lbl_mmV.grid(           row=9, column=3, sticky="w")
-lbl_medidaH.grid(       row=10, column=1, sticky="e")
-txt_medidaH.grid(       row=10, column=2, sticky="w")
-lbl_mmH.grid(           row=10, column=3)
-
-# endregion
-
-# region 2 - Calibracion de extremos Izquierdo y Derecho
-btn_calibrar_extremos = Button( lblf_patron, text="Expremos", command=calibrar_extremos)
-lbl_izquierdo= Label(           lblf_patron, text="Izquierdo:")
-txt_izquierdo= Entry(           lblf_patron, width=7)
-lbl_derecho= Label(             lblf_patron, text="Derecho:")
-txt_derecho= Entry(             lblf_patron, width=7)
-
-btn_calibrar_extremos.grid( row=11, column=0, sticky="w")
-lbl_izquierdo.grid(         row=12, column=1, sticky="w")
-txt_izquierdo.grid(         row=12, column=2, sticky="w")
-lbl_derecho.grid(           row=13, column=1, sticky="w")
-txt_derecho.grid(           row=13, column=2, sticky="w")
-# endregion
-
-# region 3 - Calibración de Velocidad
-btn_calibrar_velocidad = Button(    lblf_Velocidad, text="Calibrar Patron Velocidad", command=calibrar_velocidad)
-lbl_patron = Label(                 lblf_Velocidad, text="Medida Patron:")
-txt_medida_patron_velocidad=Entry(  lblf_Velocidad, width=5)
-btn_medir_velocidad = Button(       lblf_Velocidad, text="Medir Velocidad", command=medir_velocidad)
-lbl_velocidad = Label(              lblf_Velocidad, text="velocidad:")
-txt_velocidad = Entry(              lblf_Velocidad, width=10)
-lbl_tiempo_espera = Label(          lblf_Velocidad, text="t. espera c/mm:")
-txt_tiempo_espera = Entry(          lblf_Velocidad, width=10)
-btn_guardar_configuracion = Button( lblf_captura_frames, text="Guardar Configuración", command=guardar_configuracion)
-
-txt_medida_patron_velocidad.insert(0, 10)
-
-lblf_Velocidad.grid(                row=13, column=0, sticky="we")
-btn_calibrar_velocidad.grid(        row=22, column=0, columnspan=2)
-lbl_patron.grid(                    row=23, column=0, sticky="e")
-txt_medida_patron_velocidad.grid(   row=23, column=1, sticky="w")
-btn_medir_velocidad.grid(           row=24, column=0, columnspan=2)
-lbl_velocidad.grid(                 row=25, column=0, sticky="e")
-txt_velocidad.grid(                 row=25, column=1)
-lbl_tiempo_espera.grid(             row=26, column=0, sticky="e")
-txt_tiempo_espera.grid(             row=26, column=1)
-btn_guardar_configuracion.grid(     row=27, column=0, columnspan=2)
-# endregion
-
-# region 4 - Captua de Frames
-lbl_tiempo = Label(                 lblf_captura_frames, text="Tiempo espera:")
-txt_tiempo = Entry(                 lblf_captura_frames, width=10)
-lbl_nombre_video = Label(           lblf_captura_frames, text="Nombre Video:")
-txt_nombre_video = Entry(           lblf_captura_frames)
-btn_capturar = Button(              lblf_captura_frames, text="Capturar Video", command=capturar_video)
-
-
-txt_tiempo.insert(          0, "")
-txt_nombre_video.insert(    0, "")
-
-
-lblf_captura_frames.grid(       row=24, column=0, sticky="we")
-lbl_tiempo.grid(                row=24, column=0, sticky="e")
-txt_tiempo.grid(                row=24, column=1, sticky="w")
-lbl_nombre_video.grid(          row=25, column=0, sticky="e")
-txt_nombre_video.grid(          row=25, column=1, sticky="w")
-btn_capturar.grid(              row=26, column=0)
-
-
-# endregion
-
-# region 5 - Medición y Generación 3D
-lbl_x = Label(      lblf_generacion3D, text="X")
-lbl_z = Label(      lblf_generacion3D, text="Z")
-lbl_y = Label(      lblf_generacion3D, text="Y")
-lbl_iz = Label(     lblf_generacion3D, text="Izquierdo")
-lbl_der = Label(    lblf_generacion3D, text="Derecho")
-lbl_base = Label(   lblf_generacion3D, text="Base")
-lbl_video = Label(  lblf_generacion3D, text="Video")
-
-txt_x = Entry(      lblf_generacion3D, width=10)
-txt_z = Entry(      lblf_generacion3D, width=10)
-txt_y = Entry(      lblf_generacion3D, width=10)
-txt_iz = Entry(     lblf_generacion3D, width=10)
-txt_der = Entry(    lblf_generacion3D, width=10)
-txt_base = Entry(   lblf_generacion3D, width=10)
-txt_video = Entry(  lblf_generacion3D, width=10)
-
-btn_buscar_archivo = Button(        lblf_generacion3D, text='Buscar Video', command=buscar_video)
-btn_generar3D = Button(             lblf_generacion3D, text="Generar 3D", command=generar_3d)
-
-txt_x.insert(0, 0.1518)
-txt_y.insert(0, 1)
-txt_z.insert(0, 0.1960)
-txt_iz.insert(0, 13)
-txt_der.insert(0, 625)
-txt_base.insert(0, 451)
-
-lblf_generacion3D.grid(         row=30, column=0, sticky="we")
-lbl_x.grid(                     row=30, column=0, sticky="we")
-txt_x.grid(                     row=30, column=1, sticky="we")
-lbl_z.grid(                     row=31, column=0, sticky="we")
-txt_z.grid(                     row=31, column=1, sticky="we")
-lbl_y.grid(                     row=32, column=0, sticky="we")
-txt_y.grid(                     row=32, column=1, sticky="we")
-lbl_iz.grid(                    row=33, column=0, sticky="we")
-txt_iz.grid(                    row=33, column=1, sticky="we")
-lbl_der.grid(                   row=34, column=0, sticky="we")
-txt_der.grid(                   row=34, column=1, sticky="we")
-lbl_base.grid(                  row=35, column=0, sticky="we")
-txt_base.grid(                  row=35, column=1, sticky="we")
-btn_buscar_archivo.grid(        row=36, column=0, columnspan=2)
-lbl_video.grid(                 row=37, column=0, sticky="we")
-txt_video.grid(                 row=37, column=1, sticky="we")
-btn_generar3D.grid(             row=38, column=0, columnspan=2)
-
-
-# endregion
-"""
 vtnPrincipal.mainloop()
