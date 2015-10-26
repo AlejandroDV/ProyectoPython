@@ -78,8 +78,8 @@ def buscar_matriz():
                     nombre_archivo += i
                 else:
                     break
-            txt_matriz_cargada.delete(0,END)
-            txt_matriz_cargada.insert(0,nombre_archivo)
+            txt_matriz_cargada.delete(0, END)
+            txt_matriz_cargada.insert(0, nombre_archivo)
     except ValueError:
         tkMessageBox.showerror("Error", "Verifique el archivo seleccionado")
     except:
@@ -92,34 +92,33 @@ def dibujar_3d(opcion):
     global px_mm_y
     global medidas_suavizadas
 
-    Z=[]
-    if opcion==1:
-        Z=medidas
-    elif opcion==2:
-        Z=medidas_suavizadas
+    z = []
+    if opcion == 1:
+        z = medidas
+    elif opcion == 2:
+        z = medidas_suavizadas
 
-    if (px_mm_y != 0) and (px_mm_y != 0) and (len(Z) > 0):
+    if (px_mm_y != 0) and (px_mm_y != 0) and (len(z) > 0):
 
+        alto, largo = z.shape[:2]
+        x = np.zeros(largo)
+        y = np.zeros(alto)
 
-        alto, largo = Z.shape[:2]
-        X = np.zeros(largo)
-        Y = np.zeros(alto)
+        for c in range(len(x)):
+            x[c] = px_mm_x * c
 
-        for c in range(len(X)):
-            X[c] = px_mm_x * c
-
-        for c in range(len(Y)):
-            Y[c] = px_mm_y * c
+        for c in range(len(y)):
+            y[c] = px_mm_y * c
 
         #np.savetxt('test.txt', medidas, fmt='%1.2f', delimiter=';')
 
         fig = plt.figure()
         ax = fig.gca(projection='3d')
 
-        X, Y = np.meshgrid(X, Y)
+        X, Y = np.meshgrid(x, y)
 
         # Tipo de gráfico
-        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        surf = ax.plot_surface(x, y, z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 
         # configuraciones del eje z
         ax.set_zlim(-1.01, 15)
@@ -146,11 +145,11 @@ def suavizar():
         medidas_suavizadas = np.copy(medidas)
         for f in range(alto):
             for c in range(largo):
-                if ( abs( altura_real - medidas_suavizadas[f, c] ) <= error_admitido ):
+                if abs( altura_real - medidas_suavizadas[f, c]) <= error_admitido:
                     medidas_suavizadas[f, c] = altura_real
-        nombre_archivo_txt = nombre_archivo+'_suavizado.txt'
+        nombre_archivo_txt = nombre_archivo + '_suavizado.txt'
         np.savetxt(nombre_archivo_txt, medidas_suavizadas, fmt='%1.2f', delimiter=';')
-        tkMessageBox.showinfo("Atención", "Las medidas suavizadas se almacenaron en: "+nombre_archivo_txt)
+        tkMessageBox.showinfo("Atención", "Las medidas suavizadas se almacenaron en: " + nombre_archivo_txt)
     except ValueError:
         tkMessageBox.showerror("Error", "Verifique los datos cargados")
 
@@ -160,19 +159,19 @@ def binarizar():
     global altura_real
     global nombre_archivo
     global imagen_binarizada
-    if len(medidas_suavizadas)==0:
+    if len(medidas_suavizadas) == 0:
         archivo = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar un Archivo')
         if archivo:
             medidas_suavizadas = genfromtxt(archivo.name, delimiter=';')
     alto, largo = medidas_suavizadas.shape[:2]
-    size = (alto,largo, 1)
+    size = (alto, largo, 1)
     imagen_binarizada = np.zeros(size)
     for f in range(alto):
         for c in range(largo):
             if medidas_suavizadas[f, c] == altura_real:
                 imagen_binarizada[f, c] = 255
     nombre_archivo_imagen = nombre_archivo + '_binario.png'
-    cv2.imshow(nombre_archivo+' Binarizado', imagen_binarizada)
+    cv2.imshow(nombre_archivo + ' Binarizado', imagen_binarizada)
     cv2.imwrite(nombre_archivo_imagen, imagen_binarizada)
     tkMessageBox.showinfo("Atención", "La imagen Binarizada se guardaron en: " + nombre_archivo_imagen)
     txt_imagen_binarizada.insert(0, nombre_archivo_imagen)
@@ -199,14 +198,14 @@ def identificar_regiones():
         tkMessageBox.showerror("Error", "No se cargo la imagen fuente")
     else:
         alto, largo = imagen_binarizada.shape[:2]
-        size = (alto,largo, 1)
+        size = (alto, largo, 1)
         regiones = np.zeros(size)
 
         print(imagen_binarizada)
         for f in range(alto):
             for c in range(largo):
-                if(imagen_binarizada[f,c] == 0):
-                    regiones[f,c] = 1
+                if imagen_binarizada[f, c] == 0:
+                    regiones[f, c] = 1
         nombre_etiquetas_archivo = nombre_archivo + '_regiones.txt'
         np.savetxt(nombre_etiquetas_archivo, regiones, fmt='%1.0f', delimiter=';')
         tkMessageBox.showinfo("Atención", "Se guardo el registro de regiones detectadas en:" + nombre_etiquetas_archivo)
@@ -249,24 +248,22 @@ def etiquetar():
     np.savetxt(nombre_padre_hijo, padres_hijos, fmt='%1.0f', delimiter=';')
     np.savetxt(nombre_etiquetas_archivo, etiquetas, fmt='%1.0f', delimiter=';')
 
-
     filas, columnas = padres_hijos.shape[:2]
 
     for f in range(alto):
         for c in range(largo):
-            if etiquetas[f,c] != 0:
+            if etiquetas[f, c] != 0:
                 for ff in range(filas):
-                    if etiquetas[f,c] == padres_hijos[ff,1]:
-                        etiquetas[f,c] = padres_hijos[ff,0]
-
+                    if etiquetas[f, c] == padres_hijos[ff, 1]:
+                        etiquetas[f, c] = padres_hijos[ff, 0]
 
     nombre_etiquetas_normalizadas = nombre_archivo + '_etiquetas_normalizado.txt'
     np.savetxt(nombre_etiquetas_normalizadas, etiquetas, fmt='%1.0f', delimiter=';')
 
     tkMessageBox.showinfo("Atención", "Se guardaron 3 archivos:\n"
-                                        "1- Prioridad de Etiquetas: "+ nombre_padre_hijo + "\n"
-                                        "2- Etiquetas: "+nombre_etiquetas_archivo+"\n"
-                                        "3- Etiquetas Normalizadas: "+nombre_etiquetas_normalizadas
+                                        "1- Prioridad de Etiquetas: " + nombre_padre_hijo + "\n"
+                                        "2- Etiquetas: "+nombre_etiquetas_archivo + "\n"
+                                        "3- Etiquetas Normalizadas: " + nombre_etiquetas_normalizadas
                           )
 
 
@@ -296,25 +293,23 @@ def etiquetado_vecindad(matriz):
         etiqueta = minimo
         filas, columnas = padres_hijos.shape[:2]
 
-        if minimo!=maximo:
-            existe=False
+        if minimo != maximo:
+            existe = False
             for f in range(filas):
                 if padres_hijos[f, 0] == minimo and padres_hijos[f, 1] == maximo:
-                    existe=True
+                    existe = True
 
             if not existe:
                 existe = False
                 for ff in range(filas):
-                    if padres_hijos[ff,1] == minimo:
-                        minimo = padres_hijos[ff,0]
+                    if padres_hijos[ff, 1] == minimo:
+                        minimo = padres_hijos[ff, 0]
                 for f in range(filas):
                     if padres_hijos[f, 0] == minimo and padres_hijos[f, 1] == maximo:
-                        existe=True
+                        existe = True
                 if not existe:
                     nuevohijo = np.asmatrix(np.array([minimo, maximo]))
                     padres_hijos = np.r_[padres_hijos, nuevohijo]
-
-
 
     #print matriz, "min: ",minimo,"max: ", maximo, "etiq: ",etiqueta
     #print "*********************************************************"
@@ -350,9 +345,11 @@ def describir_etiqueta():
     alto, largo = etiquetas.shape[:2]
     if len(etiquetas) != 0:
         etiqueta_seleccionada = int(lst_etiquetas.get(lst_etiquetas.curselection()))
+
         "Se describitá el número identificador de la etiqueta seleccionada"
         txt_descriptor_id.delete(0, END)
         txt_descriptor_id.insert(0, etiqueta_seleccionada)
+
         "Se mostrará la imagen representatica"
         imagen_descriptiva = np.ones((alto, largo)) * 255
         for f in range(alto):
@@ -361,6 +358,7 @@ def describir_etiqueta():
                     imagen_descriptiva[f, c] = 0
         cv2.imshow('Region', imagen_descriptiva)
         np.savetxt("etiqueta_filtrada.txt", imagen_descriptiva, fmt='%1.0f', delimiter=';')
+
         "Se contarán los píxeles que forman la imagen"
         contador_etiqueta = 0
         contador_fondo = 0
@@ -370,12 +368,24 @@ def describir_etiqueta():
                     contador_etiqueta += 1
                 else:
                     contador_fondo += 1
-        print contador_etiqueta, contador_fondo, contador_etiqueta+contador_fondo
+        #print contador_etiqueta, contador_fondo, contador_etiqueta+contador_fondo
         txt_descriptor_contador.delete(0, END)
         txt_descriptor_contador.insert(0, contador_etiqueta)
+
+        "Se determinará el contorno usando cv2.findContours. Se creará una nieva imagen invertida"
+        imagen_descriptiva = imagen_descriptiva.astype(np.uint8)
+        ret, imagen_descriptiva_inv = cv2.threshold(imagen_descriptiva, 200, 255, cv2.THRESH_BINARY_INV)
+        #cv2.imshow('Region invertida', imagen_descriptiva_inv)
+        contours, hierarchy = cv2.findContours(imagen_descriptiva_inv, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        #print "**************************************************"
+        #print contours, hierarchy
+        cv2.drawContours(imagen_descriptiva_inv, contours, -1, (255, 255, 255), 1)
+        cv2.imshow('Imagen Invertida', imagen_descriptiva_inv)
+        txt_coordenadas.delete(1.0,END)
+        for i in contours:
+            txt_coordenadas.insert(END, i)
     else:
         tkMessageBox.showinfo("Atención", "No existe una matriz de Etiquetas cargada:")
-
 
 
 contenedor_pestanas = Notebook(vtnPrincipal)
@@ -462,6 +472,8 @@ lbl_descriptor_id = Label(pestana_descriptor, text="Nº Etiqueta: ")
 txt_descriptor_id = Entry(pestana_descriptor)
 lbl_descriptor_contador = Label(pestana_descriptor, text="Contador:")
 txt_descriptor_contador = Entry(pestana_descriptor)
+lbl_coordenadas = Label(pestana_descriptor, text="Coordenadas:")
+txt_coordenadas = Text(pestana_descriptor, width=17, height=5)
 
 
 btn_buscar_etiquetas.grid(      row=0, column=0)
@@ -472,6 +484,8 @@ lbl_descriptor_id.grid(         row=2, column=1, sticky="e")
 txt_descriptor_id.grid(         row=2, column=2)
 lbl_descriptor_contador.grid(   row=3, column=1, sticky="e")
 txt_descriptor_contador.grid(   row=3, column=2)
+lbl_coordenadas.grid(row=4, column=1, sticky="n")
+txt_coordenadas.grid(row=4, column=2)
 # endregion
 
 vtnPrincipal.mainloop()
