@@ -33,6 +33,10 @@ padres_hijos = []
 
 
 def buscar_datos_config():
+    """
+    Permite al usuario la carga del archivo de configuración
+    :return:
+    """
     global px_mm_x
     global px_mm_y
     global medidas
@@ -55,6 +59,7 @@ def buscar_datos_config():
 
 
 def activar_pestania_suavizado():
+
     global medidas
     global px_mm_y
     global px_mm_x
@@ -63,6 +68,10 @@ def activar_pestania_suavizado():
 
 
 def buscar_matriz():
+    """
+    Permite al usuario la selección de la matriz de medidas
+    :return:
+    """
     global medidas
     global px_mm_y
     global px_mm_x
@@ -87,6 +96,11 @@ def buscar_matriz():
 
 
 def dibujar_3d(opcion):
+    """
+    Realiza el trazado 3D de la superficie seleccionada
+    :param opcion:
+    :return:
+    """
     global medidas
     global px_mm_x
     global px_mm_y
@@ -115,7 +129,7 @@ def dibujar_3d(opcion):
         fig = plt.figure()
         ax = fig.gca(projection='3d')
 
-        X, Y = np.meshgrid(x, y)
+        x, y = np.meshgrid(x, y)
 
         # Tipo de gráfico
         surf = ax.plot_surface(x, y, z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
@@ -133,6 +147,10 @@ def dibujar_3d(opcion):
 
 
 def suavizar():
+    """
+    Realiza el suavizado de la matriz de medidas
+    :return:
+    """
     global altura_real
     global error_admitido
     global medidas
@@ -155,6 +173,10 @@ def suavizar():
 
 
 def binarizar():
+    """
+    Binariza la matriz de medidas acorde al valor esperado
+    :return:
+    """
     global medidas_suavizadas
     global altura_real
     global nombre_archivo
@@ -178,6 +200,10 @@ def binarizar():
 
 
 def buscar_imagen_binarizada():
+    """
+    Permite al usuario seleccionar una imagen binaria
+    :return:
+    """
     global imagen_binarizada
     if imagen_binarizada is None:
         file = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar la Imagen Binarizada a Etiquetar')
@@ -191,6 +217,10 @@ def buscar_imagen_binarizada():
 
 
 def identificar_regiones():
+    """
+    Ientifica las regiones existentes en la imagen binarizada
+    :return:
+    """
     global imagen_binarizada
     global regiones
     global nombre_archivo
@@ -212,6 +242,10 @@ def identificar_regiones():
 
 
 def etiquetar():
+    """
+    Realiza el proceso de etiquetado según la matriz de regiones detectadas
+    :return:
+    """
     global regiones
     global etiquetas
     global etiqueta_actual
@@ -268,6 +302,11 @@ def etiquetar():
 
 
 def etiquetado_vecindad(matriz):
+    """
+    Gestiona la matriz de Prioridades
+    :param matriz:
+    :return:
+    """
     global etiqueta_actual
     global padres_hijos
     etiqueta = 0
@@ -317,6 +356,10 @@ def etiquetado_vecindad(matriz):
 
 
 def buscar_etiquetas():
+    """
+    Permite al usuario seleccionar una matriz de etiquetas reconocidas
+    :return:
+    """
     global etiquetas
     global nombre_archivo
     img_preliminar = []
@@ -340,8 +383,14 @@ def buscar_etiquetas():
 
 
 def describir_etiqueta():
+    """
+    Compendio de descriptores de región
+    :return:
+    """
     global etiquetas
     global imagen_descriptiva
+    global px_mm_x
+    global px_mm_y
     alto, largo = etiquetas.shape[:2]
     if len(etiquetas) != 0:
         etiqueta_seleccionada = int(lst_etiquetas.get(lst_etiquetas.curselection()))
@@ -350,7 +399,7 @@ def describir_etiqueta():
         txt_descriptor_id.delete(0, END)
         txt_descriptor_id.insert(0, etiqueta_seleccionada)
 
-        "Se mostrará la imagen representatica"
+        "Se mostrará la imagen representativa"
         imagen_descriptiva = np.ones((alto, largo)) * 255
         for f in range(alto):
             for c in range(largo):
@@ -381,13 +430,21 @@ def describir_etiqueta():
         #print contours, hierarchy
         cv2.drawContours(imagen_descriptiva_inv, contours, -1, (255, 255, 255), 1)
         cv2.imshow('Imagen Invertida', imagen_descriptiva_inv)
-        txt_coordenadas.delete(1.0,END)
+        txt_coordenadas.delete(1.0, END)
         for i in contours:
             txt_coordenadas.insert(END, i)
+
+        #perimetro = cv2.arcLength(contours,True)
+        #print perimetro
+        print alto, px_mm_y, alto * px_mm_y
+        print largo, px_mm_x, largo * px_mm_x
+
     else:
         tkMessageBox.showinfo("Atención", "No existe una matriz de Etiquetas cargada:")
 
 
+#-------------------------------------------------------
+#GUI
 contenedor_pestanas = Notebook(vtnPrincipal)
 pestana_cargar_datos = Frame(contenedor_pestanas)
 pestana_suavizado = Frame(contenedor_pestanas)
@@ -401,7 +458,7 @@ contenedor_pestanas.pack()
 
 # region Pestaña de selección de datos
 btn_seleccionar_configuracion = Button(pestana_cargar_datos, text="Buscar Datos Configuracion", command=buscar_datos_config)
-lbl_x =                         Label(pestana_cargar_datos, text="X:" )
+lbl_x =                         Label(pestana_cargar_datos, text="X:")
 txt_x =                         Entry(pestana_cargar_datos, width=7)
 lbl_y =                         Label(pestana_cargar_datos, text="Y:")
 txt_y =                         Entry(pestana_cargar_datos, width=7)
@@ -410,7 +467,7 @@ lbl_matriz_cargada =            Label(pestana_cargar_datos, text="Matriz cargada
 txt_matriz_cargada =            Entry(pestana_cargar_datos, width=14)
 btn_dibujar_3d =                Button(pestana_cargar_datos, text="Dibujar 3D", command=lambda: dibujar_3d(1))
 
-txt_matriz_cargada.insert(0,"No")
+txt_matriz_cargada.insert(0, "No")
 
 btn_seleccionar_configuracion.grid( row=0, column=0, columnspan=2)
 lbl_x.grid(                         row=1, column=0)
@@ -422,7 +479,7 @@ lbl_matriz_cargada.grid(            row=4, column=0)
 txt_matriz_cargada.grid(            row=4, column=1)
 btn_dibujar_3d.grid(                row=5, column=0, columnspan=2)
 
-contenedor_pestanas.tab(1,state="disabled")
+contenedor_pestanas.tab(1, state="disabled")
 
 # endregion
 

@@ -1,22 +1,8 @@
 # coding=utf-8
-from ttk import Notebook
+import os
 
 __author__ = 'Alejandro'
-
-"""
-Acciones:
-    1- Es capaz de capturar la señal de video de un dispositivo en particular pasado su identificador
-    2- Procesa la señal de video para obtener una versión esqueletizada de la proyección láser
-        2.1- El siavizado es con blur51 = cv2.medianBlur(img, 5)
-        2.2- Busca los puntos extremos de la línea láser
-        2.3- Para la esqueletización se capturan los píxeles correspondientes a la parte superior de la línea láser
-    3- Con la información estadística es posible realizar ajustes al proyector láser y a la cámara
-    4- Se ingresa la medida en vertical y horizonal del objeto de calibración y luego de procesar la señal de video y
-        determinar la región de interés correspondiente al patrón, se calcula la relación pixel-milímetros
-    5- Luego de disponer un nuevo objeto en la base, el sistema determinar la separación entre las filas de la
-        plataforma de escaneo y el nuevo objeto. El resultado es multiplicado por la medida obtenida en el punto 4
-"""
-
+from ttk import Notebook
 import cv2
 from Tkinter import *
 import tkMessageBox
@@ -43,6 +29,7 @@ camara = None
 umbral = 245
 velocidad = 0.0
 video = None
+normal = ""
 extremo_izquierdo = 0
 extremo_derecho = 0
 nombre_video = ""
@@ -179,7 +166,10 @@ def control_calibrar_patron():
 
 
 def calibrar_extremos():
-
+    """
+    Delimita la región a escanear en Horizontal al definir las columnas Izquierda y Derecha
+    :return:
+    """
     global extremo_derecho
     global extremo_izquierdo
 
@@ -488,7 +478,7 @@ def detector_lineas_velocidad(color):
 
 def capturar_video():
     """
-    Crea un video capturando los frames interesantes, tomando como referencia la velocidad medida en el etapa anterior
+    Crea un video capturando frames, tomando como referencia la velocidad medida en el etapa anterior
     :return:
     """
     global camara
@@ -517,6 +507,27 @@ def capturar_video():
         camara.release()
 
 
+def filtrar_video():
+    global normal
+
+    cap = cv.CaptureFromFile(normal)
+    separador = int(txt_separacion_perfiles.get())
+    nframes = int(cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FRAME_COUNT))
+    nombre = "filtrado.avi"
+    fourcc = cv2.cv.CV_FOURCC(*'XVID')
+    out = cv2.VideoWriter(nombre, fourcc, 20.0, (640, 480))
+    print normal
+    for f in xrange(nframes):
+        frameimg = cv.QueryFrame(cap)
+        if f % separador == 0:
+            tmp = cv.CreateImage(cv.GetSize(frameimg), 8, 3)
+            #(frameimg, tmp, cv.CV_BGR2RGB)
+            array = np.asarray(cv.GetMat(tmp))
+            out.write(array)
+            cv.ShowImage("hcq", frameimg)
+            cv.WaitKey(1)
+
+
 def buscar_video():
     """
     Se solicita la selección de un archivo de video al usuario
@@ -534,7 +545,7 @@ def buscar_video():
 
 def reproducir_video():
     """
-
+    Se realiza la reproducción del video seleccionado
     :return:
     """
     global video
@@ -553,7 +564,6 @@ def generar_3d():
     Generación de la matriz de alturas.
     :return: Matriz de alturas
     """
-
     global video
     global px_mm_x
     global px_mm_y
@@ -584,8 +594,10 @@ def generar_3d():
 
 def medicion_perfil(imagen, columnas):
     """
-        se medirá 1 perfil completo
-    :return: vector de medidas
+    Medición 1 perfil completo
+    :param imagen: La imagen a analizar
+    :param columnas: cantidad de columnas a analizar
+    :return:
     """
     global video
     global extremo_izquierdo
@@ -608,6 +620,10 @@ def medicion_perfil(imagen, columnas):
 
 
 def validar_datos_generar_3d():
+    """
+    Validación de los datos para la medición 3D
+    :return:
+    """
 
     global px_mm_x
     global px_mm_z
@@ -683,6 +699,11 @@ def validar_datos_generar_3d():
 
 
 def dibujar_3d(z):
+    """
+    Trazado del gráfico 3D
+    :param z: Matriz de medidad
+    :return:
+    """
     global px_mm_x
     global px_mm_y
     global nombre_video
@@ -739,7 +760,7 @@ def guardar_configuracion():
 
 def ver_camara():
     """
-    visualización de la señal de video sin procesamiento
+    Visualización de la señal de video sin procesamiento
     :return:
     """
     try:
@@ -769,21 +790,36 @@ def calcular_tiempo_espera():
     global tiempo_espera
     global velocidad
     global px_mm_y
-    try:
-        if velocidad != 0.0:
-            separacion = float(txt_separacion_perfiles.get())
-            px_mm_y = separacion
-            tiempo_espera = '%.3f' % (separacion / velocidad)
-            txt_tiempo_espera.delete(0, END)
-            txt_tiempo_espera.insert(0, tiempo_espera)
-            btn_capturar_video.config(state=NORMAL)
-        else:
-            tkMessageBox.showwarning('Atención', "La velocidad no fué determinada")
-    except (ValueError, TypeError):
-        tkMessageBox.showerror("Error", "Verifique el Valor de Separación")
+    global normal
+    #try:
+    if velocidad != 0.0 and len(normal) > 0:
+        """separacion = float(txt_separacion_perfiles.get())
+        px_mm_y = separacion
+        tiempo_espera = '%.3f' % (separacion / velocidad)
+        txt_tiempo_espera.delete(0, END)
+        txt_tiempo_espera.insert(0, tiempo_espera)
+        btn_capturar_video.config(state=NORMAL)"""
+        frames = int(txt_separacion_perfiles.get())
+        print normal
+        cap = cv.CaptureFromFile(normal)
+        print cap
+        fps = int(cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FPS))
+        mmXf = velocidad / fps
+        px_mm_y = mmXf * frames
+        txt_tiempo_espera.delete(0, END)
+        txt_tiempo_espera.insert(0, px_mm_y)
+        btn_filtrar_video.config(state=NORMAL)
+    else:
+        tkMessageBox.showwarning('Atención', "La velocidad no fué determinada")
+    #except (ValueError, TypeError):
+     #   tkMessageBox.showerror("Error", "Verifique el Valor de Separación")
 
 
 def cargar_configuracion():
+    """
+    Solicitud al usuario para cargar los datos de configuración
+    :return:
+    """
     global px_mm_x
     global px_mm_y
     global px_mm_z
@@ -824,6 +860,70 @@ def cargar_configuracion():
     except:
         tkMessageBox.showerror("Error", "Error Inesperado")
 
+
+def capturar_normal():
+    """
+    Crea un video capturando frames, tomando como referencia la velocidad medida en el etapa anterior
+    :return:
+    """
+    global camara
+    global id_dispositivo
+    global tiempo_espera
+    if not cv2.VideoCapture(int(txt_id_dispositivo.get())).read()[0]:
+        tkMessageBox.showerror("Error", "No se detectó la Cámara")
+    else:
+        camara = cv2.VideoCapture(id_dispositivo)
+        if len(txt_nombre_normal.get()) == 0:
+            nombre = "normal.avi"
+        else:
+            nombre = txt_nombre_normal.get() + '.avi'
+        fourcc = cv2.cv.CV_FOURCC(*'XVID')
+        out = cv2.VideoWriter(nombre, fourcc, 20.0, (640, 480))
+        while True:
+            ret, color = camara.read()
+            out.write(color)
+            cv2.imshow('Camara', color)
+            if cv2.waitKey(33) & 0xFF == ord('q'):
+                break
+        cv2.destroyWindow('Camara')
+        camara.release()
+
+
+def cargar_normal():
+    global normal
+    """try:
+        archivo = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar el video Normal')
+        if archivo:
+            normal = archivo
+            nombre = os.path.split(archivo.name)[1]
+            txt_nombre_normal.delete(0, END)
+            txt_nombre_normal.insert(0, nombre)
+            cap = cv.CaptureFromFile(file.name)
+            nframes = int(cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FRAME_COUNT))
+            fps = int(cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FPS))
+            print nframes, fps
+    except:
+        tkMessageBox.showerror("Error", "Error Inesperado")
+    """
+    try:
+        file = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar un Archivo')
+        if file != None:
+            normal = file.name
+            cap = cv.CaptureFromFile(file.name)
+            nframes = int(cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FRAME_COUNT))
+            fps = int(cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FPS))
+            datos = "Total frames: " + str(nframes) + ", fps: " + str(fps)
+            txt_datos_normal.delete(0, END)
+            txt_datos_normal.insert(0, datos)
+            #print "total frame", nframes
+            #print "fps", fps
+            print " currpos of videofile", cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_POS_MSEC)
+            print cv.GetCaptureProperty(cap, cv.CV_CAP_PROP_FOURCC)
+    except:
+        tkMessageBox.showerror("Error", sys.exc_info()[0])
+
+#----------------------------------------------------------------------------
+# Definición de GUI
 contenedor_pestanas = Notebook(vtnPrincipal)
 pestana_calibracion_camara = Frame(contenedor_pestanas)
 pestana_calibracion_velocidad = Frame(contenedor_pestanas)
@@ -838,7 +938,17 @@ contenedor_pestanas.pack()
 # region Enlace y calibración de Cámara
 
 btn_ver_camara = Button(pestana_calibracion_camara, text="Ver Camara", command=ver_camara)
-btn_ver_camara.grid(row=1, column=0, columnspan=2)
+btn_captura_normal = Button(pestana_calibracion_camara, text="Capturar Normmal", command=capturar_normal)
+btn_carga_normal = Button(pestana_calibracion_camara, text="Cargar Normal", command=cargar_normal)
+txt_nombre_normal = Entry(pestana_calibracion_camara)
+txt_datos_normal = Entry(pestana_calibracion_camara, width=45)
+
+btn_ver_camara.grid(row=1, column=0)
+btn_captura_normal.grid(row=2, column=1)
+btn_carga_normal.grid(row=2, column=0)
+txt_nombre_normal.grid(row=1, column=1)
+txt_datos_normal.grid(row=3, column=0, columnspan=2)
+
 
 lblf_enlace_camara = LabelFrame(pestana_calibracion_camara, text="1 - Calibración de Cámara")
 lblf_patron = LabelFrame(pestana_calibracion_camara, text="2 - Calibración Eje Z y X")
@@ -932,19 +1042,21 @@ lbl_velocidad = Label(              lblf_medir_velocidad, text="velocidad:")
 txt_velocidad = Entry(              lblf_medir_velocidad, width=10)
 
 lblf_calcular_tiempo_espera =       LabelFrame(pestana_calibracion_velocidad, text="3- Calcular Tiempo de Espera")
-lbl_separacion_perfiles = Label(    lblf_calcular_tiempo_espera, text="Separación")
+lbl_separacion_perfiles = Label(    lblf_calcular_tiempo_espera, text="Frames")
 txt_separacion_perfiles = Entry(    lblf_calcular_tiempo_espera, width=5)
-btn_calcular_tiempo_espera = Button(lblf_calcular_tiempo_espera, text="Calcular Tiempo Espera", command=calcular_tiempo_espera, state=DISABLED)
-lbl_tiempo_espera = Label(          lblf_calcular_tiempo_espera, text="t. espera c/mm:")
+btn_calcular_tiempo_espera = Button(lblf_calcular_tiempo_espera, text="Medir Separacion", command=calcular_tiempo_espera, state=DISABLED)
+lbl_tiempo_espera = Label(          lblf_calcular_tiempo_espera, text="mm X perfil:")
 txt_tiempo_espera = Entry(          lblf_calcular_tiempo_espera, width=10)
 
-lblf_captura_video =    LabelFrame(pestana_calibracion_velocidad, text="4- Captura de Video")
+lblf_captura_video =    LabelFrame(pestana_calibracion_velocidad, text="4- Filtrar Video")
 lbl_nombre_video = Label(           lblf_captura_video, text="Nombre Video:")
 txt_nombre_video = Entry(           lblf_captura_video, width=10)
-btn_capturar_video = Button(              lblf_captura_video, text="Capturar Video", command=capturar_video, state=DISABLED)
+#btn_capturar_video = Button(              lblf_captura_video, text="Capturar Video", command=capturar_video, state=DISABLED)
+btn_filtrar_video = Button(              lblf_captura_video, text="Filtrar Video", command=filtrar_video)
 txt_nombre_video.insert(    0, "")
 
 btn_guardar_configuracion = Button( pestana_calibracion_velocidad, text="Guardar Configuración", command=guardar_configuracion)
+
 
 txt_medida_patron_velocidad.insert(0, 10)
 
@@ -968,7 +1080,8 @@ txt_tiempo_espera.grid(                 row=2, column=1)
 lblf_captura_video.grid(                row=1, column=1, sticky="e")
 lbl_nombre_video.grid(                  row=1, column=0, sticky="e")
 txt_nombre_video.grid(                  row=1, column=1, sticky="w")
-btn_capturar_video.grid(                      row=2, column=0)
+#btn_capturar_video.grid(                      row=2, column=0)
+btn_filtrar_video.grid(                      row=2, column=0)
 
 btn_guardar_configuracion.grid(         row=2, column=0, columnspan=2)
 
