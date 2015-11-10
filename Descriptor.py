@@ -436,8 +436,8 @@ def describir_etiqueta():
 
         #perimetro = cv2.arcLength(contours,True)
         #print perimetro
-        print alto, px_mm_y, alto * px_mm_y
-        print largo, px_mm_x, largo * px_mm_x
+        print alto, px_mm_y, "Largo: ", alto * px_mm_y
+        print largo, px_mm_x, "Ancho: ", largo * px_mm_x
 
     else:
         tkMessageBox.showinfo("Atención", "No existe una matriz de Etiquetas cargada:")

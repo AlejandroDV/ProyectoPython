@@ -521,7 +521,9 @@ def filtrar_video():
         frameimg = cv.QueryFrame(cap)
         if f % separador == 0:
             tmp = cv.CreateImage(cv.GetSize(frameimg), 8, 3)
-            #(frameimg, tmp, cv.CV_BGR2RGB)
+            #cv.CvtColor(frameimg, tmp, cv.CV_BGR2RGB)
+            cv.CvtColor(frameimg, tmp, cv.CV_RGB2GRAY)
+            cv.ShowImage("CreateImage", tmp)
             array = np.asarray(cv.GetMat(tmp))
             out.write(array)
             cv.ShowImage("hcq", frameimg)
@@ -610,8 +612,9 @@ def medicion_perfil(imagen, columnas):
     superior = detectar_extremos(imagen, "n")[0]
     #print superior, calibracion_base
     #alto, largo = imagen.shape[:2]
-    for c in range(extremo_izquierdo, extremo_derecho + 1, 1):
-        for f in range(superior, calibracion_base, 1):
+    print extremo_izquierdo, int(extremo_izquierdo), extremo_derecho, int(extremo_derecho)
+    for c in range(int(extremo_izquierdo), int(extremo_derecho) + 1, 1):
+        for f in range(int(superior), int(calibracion_base), 1):
             if imagen[f, c] == 0:
                 altura_mm = round(((calibracion_base - f) * px_mm_z), 2)
                 medidas[c - extremo_izquierdo] = altura_mm
