@@ -391,18 +391,24 @@ def describir_etiqueta():
     global imagen_descriptiva
     global px_mm_x
     global px_mm_y
-    alto, largo = etiquetas.shape[:2]
+    #alto, largo = etiquetas.shape[:2]
+    largo, ancho = etiquetas.shape[:2]
+    print largo, ancho
     if len(etiquetas) != 0:
+
         etiqueta_seleccionada = int(lst_etiquetas.get(lst_etiquetas.curselection()))
 
         "Se describitá el número identificador de la etiqueta seleccionada"
-        txt_descriptor_id.delete(0, END)
-        txt_descriptor_id.insert(0, etiqueta_seleccionada)
+        tamanio = "L: " + str(largo * px_mm_y) + "mm ; A: " + str(ancho * px_mm_x) + "mm"
+        #txt_otrosdescriptores.insert(END, ("Ancho: " + str(ancho) + " x " + str(px_mm_x) + " = " + str(ancho * px_mm_x) + "mm" + "\n"))
+        #txt_otrosdescriptores.insert(END, ("Alto: " + str(largo) + " x " + str(px_mm_x) + " = " + str(largo * px_mm_y) + "mm" + "\n"))
+        txt_descriptor_tamanio.delete(0, END)
+        txt_descriptor_tamanio.insert(0, tamanio)
 
         "Se mostrará la imagen representativa"
-        imagen_descriptiva = np.ones((alto, largo)) * 255
-        for f in range(alto):
-            for c in range(largo):
+        imagen_descriptiva = np.ones((largo, ancho)) * 255
+        for f in range(largo):
+            for c in range(ancho):
                 if etiquetas[f, c] == etiqueta_seleccionada:
                     imagen_descriptiva[f, c] = 0
         cv2.imshow('Region', imagen_descriptiva)
@@ -411,8 +417,8 @@ def describir_etiqueta():
         "Se contarán los píxeles que forman la imagen"
         contador_etiqueta = 0
         contador_fondo = 0
-        for f in range(alto):
-            for c in range(largo):
+        for f in range(largo):
+            for c in range(ancho):
                 if imagen_descriptiva[f, c] == 0:
                     contador_etiqueta += 1
                 else:
@@ -436,8 +442,12 @@ def describir_etiqueta():
 
         #perimetro = cv2.arcLength(contours,True)
         #print perimetro
-        print alto, px_mm_y, "Largo: ", alto * px_mm_y
-        print largo, px_mm_x, "Ancho: ", largo * px_mm_x
+
+        txt_otrosdescriptores.delete(1.0, END)
+        "Descripción de Superficie"
+        txt_otrosdescriptores.insert(END, ("Superficie: " + str('{0:.3g}'.format(((px_mm_x * px_mm_y) * contador_etiqueta))) + "mm2" + "\n"))
+
+
 
     else:
         tkMessageBox.showinfo("Atención", "No existe una matriz de Etiquetas cargada:")
@@ -525,24 +535,25 @@ txt_etiquetas = Entry(pestana_descriptor)
 btn_describir_etiqueta = Button(pestana_descriptor, text="Describir", command=describir_etiqueta)
 lst_etiquetas = Listbox(pestana_descriptor)
 lst_etiquetas.pack()
-lbl_descriptor_id = Label(pestana_descriptor, text="Nº Etiqueta: ")
-txt_descriptor_id = Entry(pestana_descriptor)
+lbl_descriptor_tamanio = Label(pestana_descriptor, text="Tamaño: ")
+txt_descriptor_tamanio = Entry(pestana_descriptor)
 lbl_descriptor_contador = Label(pestana_descriptor, text="Contador:")
 txt_descriptor_contador = Entry(pestana_descriptor)
-lbl_coordenadas = Label(pestana_descriptor, text="Coordenadas:")
+lbl_coordenadas = Label(pestana_descriptor, text="Codigo Cadena:")
 txt_coordenadas = Text(pestana_descriptor, width=17, height=5)
-
+txt_otrosdescriptores = Text(pestana_descriptor, width=50, height=5)
 
 btn_buscar_etiquetas.grid(      row=0, column=0)
 txt_etiquetas.grid(             row=0, column=1, columnspan=2)
-lst_etiquetas.grid(             row=1, column=0, rowspan=10)
-btn_describir_etiqueta.grid(    row=1, column=1)
-lbl_descriptor_id.grid(         row=2, column=1, sticky="e")
-txt_descriptor_id.grid(         row=2, column=2)
+lst_etiquetas.grid(             row=1, column=0, rowspan=4)
+btn_describir_etiqueta.grid(    row=1, column=1, columnspan=2)
+lbl_descriptor_tamanio.grid(         row=2, column=1, sticky="e")
+txt_descriptor_tamanio.grid(         row=2, column=2)
 lbl_descriptor_contador.grid(   row=3, column=1, sticky="e")
 txt_descriptor_contador.grid(   row=3, column=2)
 lbl_coordenadas.grid(row=4, column=1, sticky="n")
 txt_coordenadas.grid(row=4, column=2)
+txt_otrosdescriptores.grid(row=5, column=0, columnspan=3)
 # endregion
 
 vtnPrincipal.mainloop()
