@@ -38,6 +38,8 @@ nombre_video = ""
 tiempo_espera = 0.0
 inf_velocidad = 0
 
+matrizMedidas3D = None
+
 
 def calibrar_camara_laser():
     """
@@ -536,6 +538,7 @@ def buscar_video():
     """
     global video
     global nombre_video
+    global matrizMedidas3D
     try:
         file = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar un Archivo')
         if file:
@@ -547,6 +550,7 @@ def buscar_video():
             mensaje = file.name + "\n" + "Frames: " + nframes + "\n" + "FPS: " + fps
             txt_datos_video.delete(1.0, END)
             txt_datos_video.insert(END, mensaje)
+            matrizMedidas3D = None
     except:
         error = str(sys.exc_info()[0]) + str(sys.exc_info()[1])
         tkMessageBox.showerror("Error", error)
@@ -568,7 +572,7 @@ def reproducir_video():
             cv.WaitKey(1)
 
 
-def generar_3d():
+def calcularMedidas3D():
     """
     Generación de la matriz de alturas.
     :return: Matriz de alturas
@@ -581,11 +585,13 @@ def generar_3d():
     global extremo_izquierdo
     global extremo_derecho
     global calibracion_base
+    global matrizMedidas3D
+
 
     if validar_datos_generar_3d():
         #print video, px_mm_x, px_mm_y, px_mm_z, extremo_izquierdo, extremo_derecho, calibracion_base
         columnas = ((extremo_derecho - extremo_izquierdo) + 1)
-        matriz = np.zeros((1, columnas))
+        matrizMedidas3D = np.zeros((1, columnas))
         video = cv2.VideoCapture(nombre_video)
         while video.isOpened():
             ret, frame = video.read()
@@ -596,10 +602,20 @@ def generar_3d():
                 #transforma el vector a una matriz
                 matriz_parciales = np.asmatrix(vector)
                 # inserta la nueva matriz en una nueva fila de la matriz de mediciones
-                matriz = np.r_[matriz, matriz_parciales]
+                matrizMedidas3D = np.r_[matrizMedidas3D, matriz_parciales]
             else:
                 video.release()
-        dibujar_3d(matriz)
+
+        try:
+            archivo_medidas = nombre_video + " - medidas3D.txt"
+            np.savetxt(archivo_medidas, matrizMedidas3D, fmt='%1.2f', delimiter=';')
+            print "La matriz de medidas fue almacenada con el nombre: " + archivo_medidas
+            tkMessageBox.showinfo("Almacenamiento de Medidas", "La matriz de medidas fue almacenada con el nombre: " + archivo_medidas)
+
+        except:
+            error = str(sys.exc_info()[0]) + str(sys.exc_info()[1])
+            tkMessageBox.showerror("Error Generando 3D", error)
+        #dibujar_3d(matriz)
 
 
 def medicion_perfil(imagen, columnas):
@@ -709,51 +725,47 @@ def validar_datos_generar_3d():
     return resultado
 
 
-def dibujar_3d(z):
+def generarImagen3D():
     """
     Trazado del gráfico 3D
-    :param z: Matriz de medidad
     :return:
     """
     global px_mm_x
     global px_mm_y
     global nombre_video
+    global matrizMedidas3D
 
-    alto, largo = z.shape[:2]
-    x = np.zeros(largo)
-    y = np.zeros(alto)
+    if matrizMedidas3D is None:
+        tkMessageBox.showerror("Medidas 3D No Calculadas", "Las Medidas 3D No Fueron Realizadas")
+    else:
+        alto, largo = matrizMedidas3D.shape[:2]
+        x = np.zeros(largo)
+        y = np.zeros(alto)
 
-    for c in range(len(X)):
-        x[c] = px_mm_x * c
+        for c in range(len(X)):
+            x[c] = px_mm_x * c
 
-    for c in range(len(Y)):
-        y[c] = px_mm_y * c
+        for c in range(len(Y)):
+            y[c] = px_mm_y * c
 
-    try:
-        archivo_medidas = nombre_video + " - medidas3D.txt"
-        np.savetxt(archivo_medidas, z, fmt='%1.2f', delimiter=';')
-        print "La matriz de medidas fué almacenada con el nombre: " + archivo_medidas
-        tkMessageBox.showinfo("Almacenamiento de Medidas", "La matriz de medidas fué almacenada con el nombre: " + archivo_medidas)
-    except:
-        error = str(sys.exc_info()[0]) + str(sys.exc_info()[1])
-        tkMessageBox.showerror("Error Generando 3D", error)
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
 
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
+        x, y = np.meshgrid(x, y)
 
-    x, y = np.meshgrid(x, y)
+        print x, y, matrizMedidas3D
 
-    # Tipo de gráfico
-    surf = ax.plot_surface(x, y, z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        # Tipo de gráfico
+        surf = ax.plot_surface(x, y, matrizMedidas3D, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 
-    # configuraciones del eje z
-    ax.set_zlim(-1.01, 15)
-    ax.zaxis.set_major_locator(LinearLocator(10))
-    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+        # configuraciones del eje z
+        ax.set_zlim(-1.01, 15)
+        ax.zaxis.set_major_locator(LinearLocator(10))
+        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
 
-    fig.colorbar(surf, shrink=0.5, aspect=5)
+        fig.colorbar(surf, shrink=0.5, aspect=5)
 
-    plt.show()
+        plt.show()
 
 
 def guardar_configuracion():
@@ -1129,7 +1141,9 @@ btn_buscar_video                = Button(lblf_buscar_video, text='Cargar Video',
 txt_datos_video                 = Text(lblf_buscar_video, width=15, height=4)
 #txt_video                      = Entry(lblf_buscar_video, width=10)
 
-btn_generar3D                   = Button(pestana_generacion_3d, text="Generar 3D", command=generar_3d)
+btn_calcularMedidas3D           = Button(pestana_generacion_3d, text="Calcular Medidas 3D",command=calcularMedidas3D)
+btn_generarImagen3D             = Button(pestana_generacion_3d, text="Generar Imagen 3D", command=generarImagen3D)
+
 
 txt_x                           .insert(0, 0.1518)
 txt_y                           .insert(0, 1)
@@ -1159,7 +1173,8 @@ btn_buscar_video                .grid(row=1, column=0, columnspan=2)
 txt_datos_video                 .grid(row=2, column=1, sticky="we")
 #txt_video                       .grid(row=2, column=1, sticky="we")
 
-btn_generar3D                   .grid(row=1, column=0, columnspan=2)
+btn_calcularMedidas3D                   .grid(row=1, column=0, columnspan=2)
+btn_generarImagen3D                   .grid(row=2, column=0, columnspan=2)
 
 # endregion
 

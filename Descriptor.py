@@ -82,6 +82,7 @@ def buscar_matriz():
             medidas = genfromtxt(archivo.name, delimiter=';')
             activar_pestania_suavizado()
             nombre = os.path.split(archivo.name)[1]
+            nombre_archivo = ""
             for i in nombre:
                 if i != ".":
                     nombre_archivo += i
