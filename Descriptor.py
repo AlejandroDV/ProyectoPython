@@ -144,7 +144,7 @@ def dibujar_3d(opcion):
 
         plt.show()
     else:
-        tkMessageBox.showerror("Error", "Faltan Buscar Datos")
+        tkMessageBox.showerror("Error", "Falta Buscar Datos")
 
 
 def suavizar():
@@ -393,10 +393,10 @@ def describir_etiqueta():
     global px_mm_x
     global px_mm_y
     #alto, largo = etiquetas.shape[:2]
-    largo, ancho = etiquetas.shape[:2]
-    print largo, ancho
-    if len(etiquetas) != 0:
 
+    if len(etiquetas) != 0:
+        largo, ancho = etiquetas.shape[:2]
+        #print largo, ancho
         etiqueta_seleccionada = int(lst_etiquetas.get(lst_etiquetas.curselection()))
 
         "Se describitá el número identificador de la etiqueta seleccionada"
@@ -448,8 +448,6 @@ def describir_etiqueta():
         "Descripción de Superficie"
         txt_otrosdescriptores.insert(END, ("Superficie: " + str('{0:.3g}'.format(((px_mm_x * px_mm_y) * contador_etiqueta))) + "mm2" + "\n"))
 
-
-
     else:
         tkMessageBox.showinfo("Atención", "No existe una matriz de Etiquetas cargada:")
 
@@ -481,10 +479,10 @@ btn_dibujar_3d =                Button(pestana_cargar_datos, text="Dibujar 3D", 
 txt_matriz_cargada.insert(0, "No")
 
 btn_seleccionar_configuracion.grid( row=0, column=0, columnspan=2)
-lbl_x.grid(                         row=1, column=0)
-txt_x.grid(                         row=1, column=1)
-lbl_y.grid(                         row=2, column=0)
-txt_y.grid(                         row=2, column=1)
+lbl_x.grid(                         row=1, column=0, sticky="e")
+txt_x.grid(                         row=1, column=1, sticky="w")
+lbl_y.grid(                         row=2, column=0, sticky="e")
+txt_y.grid(                         row=2, column=1, sticky="e")
 btn_seleccionar_matriz.grid(        row=3, column=0, columnspan=2)
 lbl_matriz_cargada.grid(            row=4, column=0)
 txt_matriz_cargada.grid(            row=4, column=1)
@@ -536,6 +534,8 @@ txt_etiquetas = Entry(pestana_descriptor)
 btn_describir_etiqueta = Button(pestana_descriptor, text="Describir", command=describir_etiqueta)
 lst_etiquetas = Listbox(pestana_descriptor)
 lst_etiquetas.pack()
+lbl_lista_etiquetas = Label(pestana_descriptor, text="Lista de Etiquetas")
+lbl_otros_descriptores = Label(pestana_descriptor, text="Otros Descriptores")
 lbl_descriptor_tamanio = Label(pestana_descriptor, text="Tamaño: ")
 txt_descriptor_tamanio = Entry(pestana_descriptor)
 lbl_descriptor_contador = Label(pestana_descriptor, text="Contador:")
@@ -545,16 +545,19 @@ txt_coordenadas = Text(pestana_descriptor, width=17, height=5)
 txt_otrosdescriptores = Text(pestana_descriptor, width=50, height=5)
 
 btn_buscar_etiquetas.grid(      row=0, column=0)
+lbl_lista_etiquetas.grid(       row=1, column=0)
+lst_etiquetas.grid(             row=2, column=0, rowspan=3)
+lbl_otros_descriptores.grid(    row=5, column=0)
+txt_otrosdescriptores.grid(     row=6, column=0, columnspan=3)
 txt_etiquetas.grid(             row=0, column=1, columnspan=2)
-lst_etiquetas.grid(             row=1, column=0, rowspan=4)
 btn_describir_etiqueta.grid(    row=1, column=1, columnspan=2)
-lbl_descriptor_tamanio.grid(         row=2, column=1, sticky="e")
-txt_descriptor_tamanio.grid(         row=2, column=2)
+lbl_descriptor_tamanio.grid(    row=2, column=1, sticky="e")
 lbl_descriptor_contador.grid(   row=3, column=1, sticky="e")
+lbl_coordenadas.grid(           row=4, column=1, sticky="n")
+txt_descriptor_tamanio.grid(    row=2, column=2)
 txt_descriptor_contador.grid(   row=3, column=2)
-lbl_coordenadas.grid(row=4, column=1, sticky="n")
-txt_coordenadas.grid(row=4, column=2)
-txt_otrosdescriptores.grid(row=5, column=0, columnspan=3)
+txt_coordenadas.grid(           row=4, column=2)
+
 # endregion
 
 vtnPrincipal.mainloop()

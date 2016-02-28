@@ -13,6 +13,7 @@ import numpy as np
 import tkFileDialog
 import cv2.cv as cv
 import time
+from numpy import genfromtxt
 
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
@@ -612,6 +613,7 @@ def calcular_medidas_3d():
             print "La matriz de medidas fue almacenada con el nombre: " + archivo_medidas
             tkMessageBox.showinfo("Almacenamiento de Medidas",
                                   "La matriz de medidas fue almacenada con el nombre: " + archivo_medidas)
+            txt_matriz_cargada.insert(0, archivo_medidas)
 
         except:
             error = str(sys.exc_info()[0]) + str(sys.exc_info()[1])
@@ -673,7 +675,7 @@ def validar_datos_generar_3d():
     mensaje = ""
 
     for i in parametros:
-        if not(isinstance(parametros[i], int)) or parametros[i] <= 0:
+        if not(isinstance(parametros[i], float)) or parametros[i] <= 0:
             mensaje += "El parametro: " + str(i) + " debe se un numero entero > 0\n"
             resultado = False
 
@@ -697,7 +699,63 @@ def generar_imagen_3d():
     global nombre_video
     global matrizMedidas3D
 
+    z = []
     if matrizMedidas3D is None:
+        try:
+            archivo = tkFileDialog.askopenfile(parent=vtnPrincipal, title='Seleccionar el archivo con la Matriz de Medidas')
+            if archivo:
+                matrizMedidas3D = genfromtxt(archivo.name, delimiter=';')
+                nombre = os.path.split(archivo.name)[1]
+                nombre_archivo = ""
+                for i in nombre:
+                    if i != ".":
+                        nombre_archivo += i
+                    else:
+                        break
+                txt_matriz_cargada.delete(0, END)
+                txt_matriz_cargada.insert(0, nombre_archivo)
+                z = matrizMedidas3D
+        except ValueError:
+            tkMessageBox.showerror("Error", "Verifique el archivo seleccionado")
+        except:
+            tkMessageBox.showerror("Error", "Error Inesperado")
+    else:
+        z = matrizMedidas3D
+
+    if (px_mm_y != 0) and (px_mm_y != 0) and (len(z) > 0):
+
+        alto, largo = z.shape[:2]
+        x = np.zeros(largo)
+        y = np.zeros(alto)
+
+        for c in range(len(x)):
+            x[c] = px_mm_x * c
+
+        for c in range(len(y)):
+            y[c] = px_mm_y * c
+
+        #np.savetxt('test.txt', medidas, fmt='%1.2f', delimiter=';')
+
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+
+        x, y = np.meshgrid(x, y)
+
+        # Tipo de gráfico
+        surf = ax.plot_surface(x, y, z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+
+        # configuraciones del eje z
+        ax.set_zlim(-1.01, 15)
+        ax.zaxis.set_major_locator(LinearLocator(10))
+        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+
+        fig.colorbar(surf, shrink=0.5, aspect=5)
+
+        plt.show()
+    else:
+        tkMessageBox.showerror("Error", "Falta Buscar Datos")
+
+    """if matrizMedidas3D is None:
         tkMessageBox.showerror("Medidas 3D No Calculadas", "Las Medidas 3D No Fueron Realizadas")
     else:
         alto, largo = matrizMedidas3D.shape[:2]
@@ -718,8 +776,7 @@ def generar_imagen_3d():
         print x, y, matrizMedidas3D
 
         # Tipo de gráfico
-        surf = ax.plot_surface(x, y, matrizMedidas3D, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0,
-                               antialiased=False)
+        surf = ax.plot_surface(x, y, matrizMedidas3D, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 
         # configuraciones del eje z
         ax.set_zlim(-1.01, 15)
@@ -729,7 +786,7 @@ def generar_imagen_3d():
         fig.colorbar(surf, shrink=0.5, aspect=5)
 
         plt.show()
-
+"""
 
 def guardar_configuracion():
     """
@@ -1125,6 +1182,9 @@ txt_datos_video = Text(lblf_buscar_video, width=15, height=4)
 btn_calcularMedidas3D = Button(pestana_generacion_3d, text="Calcular Medidas 3D", command=calcular_medidas_3d)
 btn_generarImagen3D = Button(pestana_generacion_3d, text="Generar Imagen 3D", command=generar_imagen_3d)
 
+lbl_matriz_cargada =            Label(pestana_generacion_3d, text="Matriz de Medidas 3D:")
+txt_matriz_cargada =            Entry(pestana_generacion_3d, width=20)
+
 txt_x.insert(0, 0)
 txt_y.insert(0, 0)
 txt_z.insert(0, 0)
@@ -1132,29 +1192,32 @@ txt_iz.insert(0, 0)
 txt_der.insert(0, 0)
 txt_base.insert(0, 0)
 
-lblf_buscar_configuracion.grid(row=0, column=0, sticky="n")
-btn_buscar_configuracion.grid(row=1, column=0, sticky="we", columnspan=4)
-lbl_x.grid(row=2, column=0, sticky="we")
-txt_x.grid(row=2, column=1, sticky="we")
-lbl_z.grid(row=3, column=0, sticky="we")
-txt_z.grid(row=3, column=1, sticky="we")
-lbl_y.grid(row=4, column=0, sticky="we")
-txt_y.grid(row=4, column=1, sticky="we")
-lbl_iz.grid(row=2, column=2, sticky="we")
-txt_iz.grid(row=2, column=3, sticky="we")
-lbl_der.grid(row=3, column=2, sticky="we")
-txt_der.grid(row=3, column=3, sticky="we")
-lbl_base.grid(row=4, column=2, sticky="we")
-txt_base.grid(row=4, column=3, sticky="we")
+lblf_buscar_configuracion.grid( row=0, column=0, sticky="n")
+btn_buscar_configuracion.grid(  row=1, column=0, sticky="we", columnspan=4)
+lbl_x.grid(                     row=2, column=0, sticky="we")
+txt_x.grid(                     row=2, column=1, sticky="we")
+lbl_z.grid(                     row=3, column=0, sticky="we")
+txt_z.grid(                     row=3, column=1, sticky="we")
+lbl_y.grid(                     row=4, column=0, sticky="we")
+txt_y.grid(                     row=4, column=1, sticky="we")
+lbl_iz.grid(                    row=2, column=2, sticky="we")
+txt_iz.grid(                    row=2, column=3, sticky="we")
+lbl_der.grid(                   row=3, column=2, sticky="we")
+txt_der.grid(                   row=3, column=3, sticky="we")
+lbl_base.grid(                  row=4, column=2, sticky="we")
+txt_base.grid(                  row=4, column=3, sticky="we")
 
-lblf_buscar_video.grid(row=0, column=1, sticky="n")
-btn_buscar_video.grid(row=1, column=0, columnspan=2)
+lblf_buscar_video.grid(         row=0, column=1, sticky="n")
+btn_buscar_video.grid(          row=1, column=0, columnspan=2)
 # lbl_video                       .grid(row=2, column=0, sticky="we")
-txt_datos_video.grid(row=2, column=1, sticky="we")
+txt_datos_video.grid(           row=2, column=1, sticky="we")
 # txt_video                       .grid(row=2, column=1, sticky="we")
 
-btn_calcularMedidas3D.grid(row=1, column=0, columnspan=2)
-btn_generarImagen3D.grid(row=2, column=0, columnspan=2)
+btn_calcularMedidas3D.grid(     row=1, column=0, columnspan=2)
+btn_generarImagen3D.grid(       row=3, column=0, columnspan=2)
+
+lbl_matriz_cargada.grid(        row=2, column=0, sticky="e")
+txt_matriz_cargada.grid(        row=2, column=1, sticky="w")
 
 # endregion
 
